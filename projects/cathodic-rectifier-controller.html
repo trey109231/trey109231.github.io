@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cathodic Protection Rectifier Controller | Trey Kirscht</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="../index.html">Trey Kirscht</a>
+      <div class="nav-links">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#skills">Skills</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="section project-page">
+    <p class="eyebrow">Capstone · firmware + UI + hardware validation</p>
+    <h1>Cathodic Protection Rectifier Controller</h1>
+    <p class="hero-text">
+      Client-facing capstone project for a retrofit controller that adds microcontroller-based monitoring,
+      manual and remote adjustment, SCR phase control, data acquisition, logging, and operator tooling to an
+      existing cathodic-protection rectifier system.
+    </p>
+
+    <div class="project-meta">
+      <div class="meta-box">
+        <strong>My role</strong>
+        <span>Firmware architecture, web UI, PCB assembly, bench testing, troubleshooting, and validation.</span>
+      </div>
+      <div class="meta-box">
+        <strong>Platform</strong>
+        <span>Particle Boron firmware, isolated sensing, zero-cross detection, SCR gate timing, Flask dashboard.</span>
+      </div>
+      <div class="meta-box">
+        <strong>Public summary</strong>
+        <span>Exact client implementation details are intentionally omitted; this page focuses on engineering scope and contribution.</span>
+      </div>
+    </div>
+
+    <section class="content-block">
+      <h2>Problem</h2>
+      <p>
+        Cathodic-protection rectifiers are used to protect large steel structures from corrosion, but
+        older field units often require manual local adjustment and manual measurement. The project goal
+        was to retrofit an existing rectifier with a controller that could monitor output behavior, adjust
+        the output, support local operation, and expose remote test/diagnostic features without redesigning
+        the entire rectifier.
+      </p>
+    </section>
+
+    <section class="content-block">
+      <h2>What I built</h2>
+      <ul>
+        <li>
+          Designed and implemented the firmware architecture tying together SCR firing, zero-cross timing,
+          measurements, closed-loop control, local buttons, telemetry, and test/debug features.
+        </li>
+        <li>
+          Implemented hardware-timed SCR gate pulse scheduling from detected AC zero crossings using a
+          dedicated timer path rather than delay-loop timing.
+        </li>
+        <li>
+          Built measurement and calibration code for voltage, current, and temperature acquisition,
+          including scaling, filtering, offset handling, RMS/DC reporting, and debug readouts.
+        </li>
+        <li>
+          Added control logic for manual dimming, setpoint control, survey/interruption timing, safe startup,
+          local button behavior, history logging, waveform capture, and step-response capture.
+        </li>
+        <li>
+          Developed the companion Flask dashboard for live telemetry, command/control, waveform plotting,
+          spectrum inspection, history export, transport switching, and serial/Particle Cloud communication.
+        </li>
+        <li>
+          Assembled, tested, and debugged the PCB and hardware setup on the bench using oscilloscope data,
+          measured waveforms, logged telemetry, and iterative firmware updates.
+        </li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Firmware architecture</h2>
+      <p>
+        The device firmware was split into practical modules for timing-sensitive control, measurement,
+        communications, state, data logging, and high-level control logic. The real-time path centered on
+        zero-cross detection and timer-scheduled gate pulses, while the main loop handled measurement
+        processing, closed-loop updates, UI/telemetry communication, capture publishing, and local input.
+      </p>
+      <ul class="tag-list">
+        <li>zero-cross ISR</li>
+        <li>hardware timer gate pulses</li>
+        <li>SCR phase control</li>
+        <li>PI voltage loop</li>
+        <li>ADC scaling/filtering</li>
+        <li>history buffer</li>
+        <li>waveform chunks</li>
+        <li>Particle + serial protocol</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Companion web dashboard</h2>
+      <p>
+        The web UI was built as a practical bench and demonstration tool: direct, test-focused, and easy to
+        modify during integration. It can communicate through Particle Cloud or direct USB serial while exposing
+        the same high-level controls to the browser.
+      </p>
+      <ul>
+        <li>Live telemetry/status display for voltage, current, temperature, setpoint, and control state.</li>
+        <li>Manual phase-control and voltage-setpoint commands.</li>
+        <li>Waveform capture, plotting, and simple spectrum calculation.</li>
+        <li>History buffer plotting, CSV export, and field-check packet display.</li>
+        <li>Runtime transport switching between cloud and serial control paths.</li>
+      </ul>
+    </section>
+
+    <figure class="project-figure wide">
+      <img src="../assets/capstone/capstone-web-ui.png" alt="Web dashboard for the cathodic protection rectifier controller showing telemetry, step response capture, and waveform capture views.">
+      <figcaption>
+        <strong>Companion web dashboard used for testing, operation, and demonstration.</strong>
+        The UI exposes live telemetry, manual control, waveform capture, and step-response tools over either
+        USB serial or Particle Cloud transport.
+      </figcaption>
+    </figure>
+
+    <section class="content-block">
+      <h2>Testing and results</h2>
+      <p>
+        The controller was tested on a bench setup with transformer/rectifier/load hardware and then with
+        a real cathodic-protection rectifier. Testing focused on confirming the acquisition path, gate-drive
+        timing, SCR phase-control behavior, voltage-control behavior, local/remote commands, and practical
+        measurement/debug workflows.
+      </p>
+
+      <figure class="project-figure wide">
+        <img src="../assets/capstone/capstone-rectifier-install.jpg" alt="Installed capstone controller inside a cathodic-protection rectifier cabinet.">
+        <figcaption>
+          <strong>Controller installed in the rectifier cabinet during integration testing.</strong>
+          This stage validated the retrofit concept in realistic hardware rather than only on the bench.
+        </figcaption>
+      </figure>
+      <p>
+        The final project demonstrated that an existing rectifier could be retrofitted with microcontroller
+        monitoring and control while preserving manual operation and adding remote diagnostic features.
+        Some exact implementation details and client-specific data are intentionally left out of this public
+        page.
+      </p>
+
+      <figure class="project-figure wide">
+        <img src="../assets/capstone/capstone-scope-phase-dim.jpg" alt="Oscilloscope capture showing phase-controlled rectifier waveform at approximately 25 percent dimming.">
+        <figcaption>
+          <strong>Oscilloscope validation of phase-controlled operation.</strong>
+          This capture shows the rectifier waveform under reduced-output operation, used to verify that SCR
+          firing timing and dimming behavior matched the commanded control state.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="content-block">
+      <h2>Tools & technologies</h2>
+      <ul class="tag-list">
+        <li>Particle Boron</li>
+        <li>C/C++ firmware</li>
+        <li>nRF52 timer registers</li>
+        <li>SCR/triac control</li>
+        <li>zero-cross detection</li>
+        <li>isolated sensing</li>
+        <li>Flask</li>
+        <li>JavaScript</li>
+        <li>SQLite</li>
+        <li>USB serial</li>
+        <li>Particle Cloud</li>
+        <li>oscilloscope validation</li>
+      </ul>
+    </section>
+
+    <a class="button" href="../index.html#projects">← Back to projects</a>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> Trey Kirscht.</p>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

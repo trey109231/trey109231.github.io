@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenAD3Flash | Trey Kirscht</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="../index.html">Trey Kirscht</a>
+      <div class="nav-links">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#skills">Skills</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="section project-page">
+    <p class="eyebrow">AD3 programming / embedded bring-up tools</p>
+    <h1>OpenAD3Flash: Microcontroller Programming & Flash Experiments</h1>
+    <p class="hero-text">
+      A collection of Python tools that use a Digilent Analog Discovery 3 as more than a scope:
+      a target power supply, programmable digital interface, clock source, logic tool, and
+      microcontroller/flash bring-up platform. The project grew from programming bare AVR and PIC
+      devices into a broader set of experiments around low-level protocols, readout, glitching,
+      and device recovery.
+    </p>
+
+    <div class="project-meta">
+      <div class="meta-box">
+        <strong>Role</strong>
+        <span>Solo tooling, protocol implementation, wiring, testing, and bench validation</span>
+      </div>
+      <div class="meta-box">
+        <strong>Result</strong>
+        <span>Built reusable AD3-based tools for AVR ISP, PIC programming, I²C/SPI dumps, and read-only glitch experiments.</span>
+      </div>
+      <div class="meta-box">
+        <strong>Repository</strong>
+        <span>Public repo available on GitHub.</span>
+      </div>
+    </div>
+
+    <div class="button-row compact">
+      <a class="button primary" href="https://github.com/trey109231/OpenAD3Flash">View GitHub repo</a>
+    </div>
+
+    <section class="content-block">
+      <h2>Why this project matters</h2>
+      <p>
+        This project shows low-level embedded problem solving without relying on dedicated programmers
+        or turnkey tools. It uses the AD3 as a flexible bench instrument and builds the missing protocol
+        layers in Python: power sequencing, GPIO bit-banging, SPI/I²C transactions, programming-mode
+        entry, flash verification, and waveform-assisted glitch experiments.
+      </p>
+      <p>
+        The value is not just programming old chips. The project demonstrates that I can read device
+        programming specs, build practical tooling around real hardware constraints, protect the bench
+        setup with careful wiring/safety assumptions, and debug systems at the protocol and signal level.
+      </p>
+    </section>
+
+    <section class="content-block">
+      <h2>AVR ISP programmer</h2>
+      <p>
+        The AVR tool bit-bangs the standard AVR ISP interface using AD3 DigitalIO. It supports target
+        power from the AD3, configurable pin mapping, signature read/autodetect, chip erase, Intel HEX
+        parsing, flash programming, and verification. The implementation uses a device table so the
+        protocol layer can support multiple classic AVR parts with different flash/page sizes.
+      </p>
+      <ul>
+        <li>Default AD3 ISP pins: RESET, SCK, MISO, MOSI, shared GND, and optional AD3 V+ target power.</li>
+        <li>Tested with ATmega168A and ATtiny84A-style workflows.</li>
+        <li>Device table entries include ATmega168/168P, ATmega328/328P, and ATtiny84/84A families.</li>
+        <li>Designed as a bench bring-up tool rather than a production programmer.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>PIC16F84A high-voltage programmer + runtime experiments</h2>
+      <p>
+        The PIC16F84A tool controls VDD from the AD3, bit-bangs RB6/PGC and RB7/PGD, and drives an
+        external VPP/MCLR switch for high-voltage programming. The tool can read device/config memory,
+        dump original flash contents, bulk erase, parse and flash Intel HEX files, verify flash, and
+        generate a runtime OSC1 clock from an AD3 digital output.
+      </p>
+      <ul>
+        <li>Implemented PIC14 word handling, Intel HEX parsing, dump/flash/verify flows, and test firmware generation.</li>
+        <li>Used an external 12 V VPP switch because the AD3 cannot directly drive PIC programming voltage.</li>
+        <li>Built and flashed small runtime firmware such as button/LED timing demos and shell-style experiments.</li>
+        <li>Saved original device contents before erasing old lab-bin parts.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>PIC readout/glitch experiments</h2>
+      <p>
+        I also explored read-locked PIC behavior with read-only glitch experiments. The glitch tooling
+        uses the AD3 waveform generator to power or perturb the target supply at specific moments in the
+        programming/read sequence, while optionally capturing waveforms for later analysis. The goal was
+        experimental characterization and learning, not destructive programming.
+      </p>
+      <ul>
+        <li>Generated event-aligned W1 glitches around read-command and shift-cycle timing.</li>
+        <li>Classified protected baseline reads, zero-read failure modes, and potentially interesting non-baseline responses.</li>
+        <li>Captured scope traces for selected attempts to correlate supply behavior with read results.</li>
+        <li>Kept the glitch workflow read-only: no erase/program commands in the glitch script.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>I²C EEPROM and SPI flash dumping</h2>
+      <p>
+        The project also includes small memory-dumping tools. One script bit-bangs open-drain I²C to
+        read 24C02-compatible EEPROMs, while another uses the AD3 Digital SPI engine to read 25Q-series
+        SPI NOR flash such as the FM25Q16A. These tools are useful for firmware/asset extraction,
+        board bring-up, and protocol practice.
+      </p>
+      <ul>
+        <li>24C02 EEPROM dump tool uses open-drain-style AD3 GPIO with external pullups.</li>
+        <li>FM25Q16A SPI flash dumper reads JEDEC ID, status registers, and full 2 MiB flash contents.</li>
+        <li>SPI flash workflow includes conservative in-circuit read notes and read-only safety assumptions.</li>
+        <li>Follow-on analysis scripts decoded candidate image regions and embedded binary assets.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Technical themes</h2>
+      <div class="project-meta">
+        <div class="meta-box">
+          <strong>Protocol implementation</strong>
+          <span>AVR ISP, PIC programming, I²C EEPROM reads, SPI flash reads, Intel HEX parsing.</span>
+        </div>
+        <div class="meta-box">
+          <strong>Bench integration</strong>
+          <span>AD3 supplies, DigitalIO, Digital SPI, W1 waveform output, scope capture, external VPP switching.</span>
+        </div>
+        <div class="meta-box">
+          <strong>Debug mindset</strong>
+          <span>Read specs, build tools, validate on real hardware, preserve dumps, and measure before trusting.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-block">
+      <h2>Tools & technologies</h2>
+      <ul class="tag-list">
+        <li>Python</li>
+        <li>WaveForms SDK / DWF</li>
+        <li>Analog Discovery 3</li>
+        <li>AVR ISP</li>
+        <li>PIC16F84A</li>
+        <li>PIC16F73</li>
+        <li>Intel HEX</li>
+        <li>I²C</li>
+        <li>SPI NOR flash</li>
+        <li>Glitch experiments</li>
+        <li>Oscilloscope capture</li>
+        <li>Bench bring-up</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Next additions</h2>
+      <p>
+        Add wiring diagrams, terminal screenshots, example command outputs, photos of the target
+        breadboards, flash-dump visualizations, and a cleaned public GitHub repo. This should be framed
+        as a bench-tooling and low-level embedded bring-up project, not just a set of unrelated scripts.
+      </p>
+    </section>
+
+    <a class="button" href="../index.html#projects">← Back to projects</a>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> Trey Kirscht.</p>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

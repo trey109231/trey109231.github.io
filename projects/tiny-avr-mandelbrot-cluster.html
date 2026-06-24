@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tiny AVR Mandelbrot Cluster | Trey Kirscht</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="../index.html">Trey Kirscht</a>
+      <div class="nav-links">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#skills">Skills</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="section project-page">
+    <p class="eyebrow">Distributed embedded computing experiment</p>
+    <h1>Tiny AVR Mandelbrot Cluster</h1>
+    <p class="hero-text">
+      A small distributed Mandelbrot renderer built from five ATtiny84A microcontrollers, a Digilent
+      Analog Discovery 3, and a Python host scheduler. Each worker computes one row of an ASCII
+      Mandelbrot image when assigned a job, and the host dynamically schedules rows across the available
+      chips.
+    </p>
+
+    <div class="project-meta">
+      <div class="meta-box">
+        <strong>Role</strong>
+        <span>Solo firmware, host software, wiring, programmer workflow, scheduler, and test/debug</span>
+      </div>
+      <div class="meta-box">
+        <strong>Result</strong>
+        <span>Rendered an 80×40 ASCII Mandelbrot image across five ATtiny84A workers.</span>
+      </div>
+      <div class="meta-box">
+        <strong>Repository</strong>
+        <span>Public repo available on GitHub.</span>
+      </div>
+    </div>
+
+    <div class="button-row compact">
+      <a class="button primary" href="https://github.com/trey109231/attiny84aMandelbrotCluster">View GitHub repo</a>
+    </div>
+
+    <section class="content-block">
+      <h2>Project overview</h2>
+      <p>
+        This project was built as a small but meaningful distributed-computing experiment. The Mandelbrot
+        output is mostly an excuse to build the full stack: programming multiple tiny AVR chips, wiring
+        a shared bus, writing worker firmware, handling shared MISO behavior, dynamically scheduling
+        jobs from a Python host, and reconstructing the final output.
+      </p>
+      <p>
+        It is intentionally not fast. The interesting part is that the system behaves like a small compute
+        cluster built from extremely limited microcontrollers.
+      </p>
+    </section>
+
+    <section class="content-block">
+      <h2>Hardware architecture</h2>
+      <p>
+        The cluster uses five ATtiny84A microcontrollers as identical worker nodes. All workers share
+        SCK, MOSI, and MISO lines, while each worker has its own chip-select line from the AD3. The AD3
+        also powers the targets from V+ during runtime.
+      </p>
+      <ul>
+        <li>5× ATtiny84A workers on a shared SPI-style bus.</li>
+        <li>AD3 DIO0/DIO1/DIO2 used as shared SCK/MOSI/MISO.</li>
+        <li>Individual chip-select lines select worker 0–4.</li>
+        <li>Each worker tri-states MISO whenever it is not selected, allowing the shared MISO bus to work safely.</li>
+        <li>Workers were programmed using the separate AD3 AVR ISP tooling.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Worker firmware</h2>
+      <p>
+        Each ATtiny runs the same firmware. There is no per-chip address stored in firmware; the chip-select
+        line acts as the address. The worker supports a tiny command protocol: ping, render row, and read row.
+        The Mandelbrot calculation uses fixed-point math to avoid expensive floating-point and software
+        division on the AVR.
+      </p>
+      <ul>
+        <li><strong>0xA0</strong>: ping; worker responds with <strong>0x5A</strong>.</li>
+        <li><strong>0xB1 row</strong>: compute one Mandelbrot row and store it in an 80-byte row buffer.</li>
+        <li><strong>0xB2</strong>: read the stored ASCII row back to the host.</li>
+        <li>Fixed-point scale factor of 4096; inner-loop divisions are replaced with right shifts.</li>
+        <li>Character palette maps Mandelbrot escape iteration count to ASCII symbols.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Python host and scheduler</h2>
+      <p>
+        The Python host opens the AD3 through the WaveForms SDK, optionally enables target power, bit-bangs
+        the shared SPI-style bus, pings all workers, assigns render jobs, polls for completion, reads rows
+        back, and reconstructs the final ASCII image.
+      </p>
+      <p>
+        The scheduler is deliberately simple but effective: initially give one row to each worker, then
+        whenever a worker finishes, read its result and assign the next available row. This matters because Mandelbrot rows do not all require the same amount of compute time.
+      </p>
+    </section>
+
+    <section class="content-block">
+      <h2>Result</h2>
+      <p>
+        One 40×80 render completed in about 153 seconds using five workers and a conservative 1000 µs bit
+        delay. The row distribution was uneven, which is expected and actually demonstrates why dynamic
+        scheduling is useful: boundary-heavy rows take longer, so the fastest available worker receives
+        the next row instead of statically assigning equal work.
+      </p>
+      <div class="project-meta">
+        <div class="meta-box">
+          <strong>Resolution</strong>
+          <span>80 columns × 40 rows ASCII Mandelbrot output</span>
+        </div>
+        <div class="meta-box">
+          <strong>Runtime</strong>
+          <span>About 153 seconds with five ATtiny84A workers</span>
+        </div>
+        <div class="meta-box">
+          <strong>Known issue</strong>
+          <span>Breadboard bus occasionally corrupted characters at higher speeds; checksum/retry would be the next fix.</span>
+        </div>
+      </div>
+      <pre class="ascii-art">                                           .....:::::..
+                                         ......::=@=:.....
+                                      ........:@@@@@@=:.......
+                                    .........:-@@@@@@=.........
+                                 ....:.=...::::+@@@@@::::.....:..
+                              .......:@--::@=@@@@@@@@@@-+%:..:-...
+                       ..............:-@@@@@@@@@@@@@@@@@@@@@@@-:...
+                    ...............:--@@@@@@@@@@@@@@@@@@@@@@@%:....
+              .....:-:::::-:::..::-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@+:.
+           .........:-@@@@@@@@@=:-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@-..
+        ........+:::@@@@@@@@@@@@@+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@...
+ .....::..:.::::+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=:....
+ .....::..:.::::+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:....
+          ........:===@@@@@@@@@@-=@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:..
+                    ...............:--%@@@@@@@@@@@@@@@@@@@@@@@:....
+                       ..............:-@@@@@@@@@@@@@@@@@@@@@@@-:...
+                              .......:%--::@=@@@@@@@@@@-+%:..:-...
+                                    .........:-@@@@@@=.........
+                                      ........:@@@@@@=:.......
+                                         ......::=@=:.....
+                                           .....:::::..</pre>
+    </section>
+
+    <section class="content-block">
+      <h2>What I would improve next</h2>
+      <ul>
+        <li>Add row checksums or CRCs and retry invalid rows.</li>
+        <li>Use a cleaner bus driver or AVR hardware USI/SPI approach.</li>
+        <li>Move the workers from breadboard wiring to a small backplane PCB.</li>
+        <li>Try an 8 MHz internal clock configuration.</li>
+        <li>Add timing/performance logging per row and per worker.</li>
+        <li>Render to an image file instead of ASCII only.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Tools & technologies</h2>
+      <ul class="tag-list">
+        <li>ATtiny84A</li>
+        <li>AVR C</li>
+        <li>Python</li>
+        <li>WaveForms SDK / DWF</li>
+        <li>Analog Discovery 3</li>
+        <li>Fixed-point math</li>
+        <li>Shared SPI-style bus</li>
+        <li>Distributed scheduling</li>
+        <li>ASCII rendering</li>
+      </ul>
+    </section>
+
+    <a class="button" href="../index.html#projects">← Back to projects</a>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> Trey Kirscht.</p>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

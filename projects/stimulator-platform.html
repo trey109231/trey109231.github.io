@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>48-Channel Intraspinal Stimulation Platform | Trey Kirscht</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="../index.html">Trey Kirscht</a>
+      <div class="nav-links">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#skills">Skills</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="section project-page">
+    <p class="eyebrow">Mixed-signal R&D prototype · Centrepiece project</p>
+    <h1>48-Channel Intraspinal Stimulation Platform</h1>
+    <p class="hero-text">
+      A routed eight-lane waveform-generator architecture for a 48-channel intraspinal stimulation
+      research system. The project combines analog current-output design, sampled command-capacitor
+      timing, AD3-based hardware-timed waveform control, crosspoint electrode routing, muxed measurement,
+      PCB implementation, and staged hardware bring-up planning.
+    </p>
+
+    <div class="project-meta">
+      <div class="meta-box">
+        <strong>Role</strong>
+        <span>Architecture evaluation, circuit validation, software timing tests, component selection, schematic/PCB layout, DFM review, and bring-up planning</span>
+      </div>
+      <div class="meta-box">
+        <strong>Status</strong>
+        <span>PCB and parts have been ordered; staged hardware bring-up will begin once they arrive.</span>
+      </div>
+      <div class="meta-box">
+        <strong>Core result</strong>
+        <span>Validated an eight-lane routed architecture as a practical bench-prototype approach for 48 addressable electrodes.</span>
+      </div>
+    </div>
+
+    <section class="content-block">
+      <h2>Project overview</h2>
+      <p>
+        The goal was to develop a bench prototype capable of producing programmable biphasic
+        current pulses for a 48-channel intraspinal electrode system. The design target was not a final
+        implantable stimulator; it was a hardware platform to validate the stimulation architecture before
+        future miniaturization or custom IC development.
+      </p>
+      <p>
+        The final direction uses eight precision stimulation lanes routed to 48 electrode outputs. This
+        avoids duplicating a full precision current-output stage 48 times while still allowing flexible
+        access to many electrode sites. The routed-lane approach matches the experimental requirement:
+        many addressable electrodes, but only a smaller number active during a given stimulation block.
+      </p>
+    </section>
+
+    <figure class="project-figure wide">
+      <img src="../assets/stimulator/stimulator-pcb-render.png" alt="3D PCB render of the 48-channel intraspinal stimulator prototype designed in Altium.">
+      <figcaption>
+        <strong>PCB layout render for the 48-channel intraspinal stimulator prototype.</strong>
+        The board implements eight active stimulation lanes routed to 48 electrodes, onboard power
+        regulation, measurement routing, sync output, safe default states, and AD3-based control.
+      </figcaption>
+    </figure>
+
+    <section class="content-block">
+      <h2>System requirements</h2>
+      <ul>
+        <li>48 electrode outputs plus a reference/common-return path, with possible future expansion toward 64 outputs.</li>
+        <li>Up to approximately eight active stimulation lanes routed to selected electrode sites.</li>
+        <li>Programmable biphasic current pulses up to approximately 300 µA.</li>
+        <li>Target pulse widths of roughly 100–500 µs and interphase intervals from 0–100 µs.</li>
+        <li>Stimulation frequencies in the 1–100 Hz range.</li>
+        <li>Support for symmetric and asymmetric pulse shapes, calibration, measurement, and future closed-loop work.</li>
+        <li>Bench-prototype safe states: no unintended stimulation during startup, reset, routing changes, or AD3 disconnects.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Architecture selection</h2>
+      <p>
+        Several architectures were evaluated before settling on the eight-lane routed design. A fully
+        independent 48-channel system would provide maximum flexibility, but it would require 48 copies
+        of the expensive and sensitive analog output circuitry. A full muxed sample-and-hold system
+        reduced analog duplication, but made timing, control-line count, and channel conflicts much more
+        difficult. A Howland/current-pump approach was considered, but did not remove polarity-switching
+        complexity and was less attractive for this first prototype.
+      </p>
+      <p>
+        The selected architecture uses eight feedback-controlled sampled-command source/sink lanes,
+        routed to 48 electrodes through three AD75019 analog crosspoint matrices. This keeps the precision
+        current-control hardware local to eight active lanes while allowing flexible electrode assignment.
+      </p>
+      <div class="project-meta">
+        <div class="meta-box">
+          <strong>Rejected</strong>
+          <span>48 fully independent output stages: flexible but too large, costly, and hard to debug for a first board.</span>
+        </div>
+        <div class="meta-box">
+          <strong>Rejected</strong>
+          <span>Open-loop MOSFET gate-capacitor stage: simple, but too load-dependent for electrode-like loads.</span>
+        </div>
+        <div class="meta-box">
+          <strong>Selected</strong>
+          <span>Eight feedback-controlled sampled-command lanes routed through AD75019 crosspoints.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-block">
+      <h2>Output-stage design</h2>
+      <p>
+        Each active lane uses separate PMOS source and NMOS sink branches for the two pulse polarities.
+        Short AD3-controlled write windows program command capacitors through TMUX4051 analog muxes.
+        During the stimulation phase, the capacitor voltage sets the target sense-resistor voltage inside
+        an op-amp feedback loop, so the output current is controlled by feedback rather than by an
+        open-loop MOSFET gate voltage.
+      </p>
+      <ul>
+        <li>Two command capacitors per lane: one for the source branch and one for the sink branch.</li>
+        <li>Separate PMOS/NMOS current-control loops for biphasic operation.</li>
+        <li>2 kΩ sense-resistor scaling: approximately 0.6 V maps to 300 µA.</li>
+        <li>Output off state during gaps, startup, and route changes.</li>
+        <li>Compensation/gate resistance/gate protection included after breadboard stability testing.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Breadboard validation and lessons learned</h2>
+      <p>
+        The one-channel breadboard prototype was used to validate the output-stage direction before the
+        full PCB. This testing confirmed the basic source/sink current-control concept, but also exposed
+        the practical analog issues that shaped the final design.
+      </p>
+      <ul>
+        <li>Early sense-path loading caused poor low-current behavior; adding buffers between sense nodes and the measurement path fixed the issue.</li>
+        <li>After the buffers were added, the PMOS/source loop required compensation to control ringing and improve stability.</li>
+        <li>Resistive and electrode-like loads were both considered because the electrode interface is not an ideal resistor.</li>
+        <li>High-resistance loads showed that compliance voltage, not feedback concept, was the main limiting factor.</li>
+        <li>Testing at approximately ±7.8 V rails supported moving beyond the original ±5 V prototype supply assumption.</li>
+      </ul>
+    </section>
+
+    <figure class="project-figure wide">
+      <img src="../assets/stimulator/stimulator-one-channel-breadboard.jpg" alt="Breadboarded one-channel stimulator prototype with analog circuitry, mux boards, and jumper wiring.">
+      <figcaption>
+        <strong>Breadboarded one-channel prototype used before PCB implementation.</strong>
+        This setup was used to validate the PMOS/NMOS current source-sink architecture, command-capacitor
+        control, measurement-path behavior, and timing integration with the Analog Discovery 3.
+      </figcaption>
+    </figure>
+
+    <section class="content-block">
+      <h2>AD3 timing and software validation</h2>
+      <p>
+        The Analog Discovery 3 is used as the first prototype timing and control hub. Live Python/USB
+        updates were tested and rejected for pulse-critical timing because the command path has too much
+        latency and jitter for 100–500 µs stimulation phases. Instead, the software builds complete
+        analog and digital timing frames, loads them into the AD3, and lets the AD3 play them back using
+        local hardware timing.
+      </p>
+      <ul>
+        <li>W1/W2 generate shared source/sink command-bus voltages.</li>
+        <li>DigitalOut controls command mux addresses/enables, measurement selection, crosspoint programming, LED data, and common-return enable.</li>
+        <li>Preloaded playback is used for pulse edges, mux write windows, phase timing, and interphase gaps.</li>
+        <li>Live software control is reserved for slower updates between stimulation blocks.</li>
+        <li>DWF SDK profiling showed configure/status calls are expensive, while many setters/data upload calls mainly stage driver data.</li>
+        <li>Dual AnalogOut mode issues were traced to incorrect user-level buffer packing; single-frame packing fixed the tested dualcustom/dualpattern behavior.</li>
+      </ul>
+    </section>
+
+    <figure class="project-figure wide">
+      <img src="../assets/stimulator/stimulator-ui-pulse-validation.png" alt="Custom AD3 control UI showing one-channel stimulation settings and measured voltage and current pulse plots.">
+      <figcaption>
+        <strong>Custom AD3 control and validation interface used during one-channel prototype testing.</strong>
+        The captured plots show a biphasic stimulation pulse with measured output voltage and current,
+        used to validate timing, polarity sequencing, command-cap behavior, and output-stage response.
+      </figcaption>
+    </figure>
+
+    <section class="content-block">
+      <h2>PCB implementation</h2>
+      <p>
+        The full PCB implements the AD3 interface, ±7.8 V analog rails, command-capacitor muxing, eight
+        output lanes, muxed measurement, common-return control, three AD75019 crosspoint matrices, status
+        indicators, sync output, and safe startup defaults.
+      </p>
+      <ul>
+        <li>Four-layer PCB: top analog/component routing, internal solid ground plane, internal power distribution, and bottom digital/overflow routing.</li>
+        <li>External 12 V medical adapter input with fuse and reverse-polarity protection.</li>
+        <li>LT3045 positive analog rail and LTC3261 + LT3094 negative analog rail for approximately ±7.8 V operation.</li>
+        <li>Three AD75019 16×16 crosspoint matrices route eight active lanes to 48 electrode outputs.</li>
+        <li>ADG1419 common-return switching and reference/ground jumper options.</li>
+        <li>Addressable lane LEDs, rail status LEDs, and sync header for experiment/debug visibility.</li>
+        <li>Pullups/pulldowns enforce safe default states when AD3 pins are disconnected or not yet configured.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Control and DIO allocation</h2>
+      <p>
+        The AD3 digital lines were allocated to support command-cap programming, measurement selection,
+        crosspoint programming, status indicators, and common-return control within the 16 available DIO
+        lines.
+      </p>
+      <div class="project-meta">
+        <div class="meta-box">
+          <strong>DIO0–DIO7</strong>
+          <span>Source/sink command mux addresses and active-low mux enables.</span>
+        </div>
+        <div class="meta-box">
+          <strong>DIO8–DIO14</strong>
+          <span>Measurement mux address, LED data, AD75019 serial data/clock/latch control.</span>
+        </div>
+        <div class="meta-box">
+          <strong>DIO15</strong>
+          <span>Common-return enable/control, kept direct because it is safety-relevant.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-block">
+      <h2>Planned bring-up</h2>
+      <p>
+        The PCB and parts are currently on order. The full version will be brought up in stages rather
+        than assembled and powered all at once. This is intended to reduce the chance of damaging expensive
+        crosspoint/output-stage parts and to make faults easier to isolate.
+      </p>
+      <ol>
+        <li>Bare-board inspection: connector orientation, rail-to-ground resistance, shorts, and continuity.</li>
+        <li>Power entry: barrel jack polarity, fuse, reverse-protection diode, protected 12 V rail, and current limit.</li>
+        <li>Regulators: +7.8 V, −7.8 V, 5 V/D_VCC behavior, ripple, and heating.</li>
+        <li>AD3 connector: DIO defaults, pullups/pulldowns, W1/W2 routing, trigger pins, and safe states.</li>
+        <li>LEDs and level shifting: one LED first, data polarity, LED current, and switching behavior.</li>
+        <li>One output lane: command caps, gates, source/sink current, off state, compensation, and resistive load testing.</li>
+        <li>Measurement path: voltage/current capture, mux selection, scaling, and loading effects.</li>
+        <li>One AD75019: serial programming, default-open behavior, selected route continuity, and isolation.</li>
+        <li>Full routing and multi-lane tests: CH1–CH48 validation, common return, reference jumpers, and varied stimulation patterns.</li>
+      </ol>
+    </section>
+
+    <section class="content-block">
+      <h2>Known limitations and future direction</h2>
+      <p>
+        The first PCB is a bench prototype, not a final implantable or fully closed-loop device. It is
+        intended to validate the routed-lane architecture, output-stage behavior, measurement path, and
+        control strategy. Fast pulse-to-pulse closed-loop updates are not practical through live Python/USB,
+        so future versions may benefit from a local embedded controller, FPGA/Zynq sequencer, or eventual
+        custom mixed-signal IC controller.
+      </p>
+      <ul>
+        <li>Compliance voltage remains the main limit for very high-resistance loads.</li>
+        <li>Calibration is required for accurate source/sink current delivery.</li>
+        <li>PCB loop stability and measurement noise must be characterized after assembly.</li>
+        <li>Crosspoint routing should be updated only while output lanes are blanked or inactive.</li>
+        <li>Future work could include embedded/FPGA control, 64-channel expansion, more active lanes, and closed-loop experiment support.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Tools & technologies</h2>
+      <ul class="tag-list">
+        <li>Altium Designer</li>
+        <li>LTspice</li>
+        <li>Python</li>
+        <li>WaveForms SDK / DWF</li>
+        <li>Analog Discovery 3</li>
+        <li>AD75019</li>
+        <li>TMUX4051</li>
+        <li>TLV9102/TLV9104</li>
+        <li>INA597</li>
+        <li>PMOS/NMOS current loops</li>
+        <li>Crosspoint routing</li>
+        <li>Bench validation</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>What this project demonstrates</h2>
+      <p>
+        This project demonstrates end-to-end hardware/software ownership: evaluating
+        architectures, rejecting designs based on real limitations, validating one-channel analog hardware,
+        profiling the timing toolchain, selecting parts, laying out a dense mixed-signal PCB, reviewing
+        manufacturing files, and preparing a realistic staged bring-up plan.
+      </p>
+    </section>
+
+    <a class="button" href="../index.html#projects">← Back to projects</a>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> Trey Kirscht.</p>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

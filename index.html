@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trey Kirscht | Embedded Systems & Hardware/Firmware</title>
+  <meta name="description" content="Portfolio for Trey Kirscht: embedded systems, hardware/firmware, PCB prototypes, mixed-signal validation, and low-level tools.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="#top">Trey Kirscht</a>
+      <div class="nav-links">
+        <a href="#projects">Projects</a>
+        <a href="#skills">Skills</a>
+        <a href="#experience">Experience</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero section">
+      <div class="hero-copy">
+        <p class="eyebrow">Electrical Engineering · Embedded Systems · Hardware/Firmware</p>
+        <h1>I build low-level hardware/software systems that actually work on the bench.</h1>
+        <p class="hero-text">
+          I build embedded and mixed-signal systems that connect firmware, instrumentation, PCB hardware,
+          and bench validation. My work spans research prototypes, control systems, custom programming
+          tools, and hardware/software integration for real devices.
+        </p>
+        <div class="button-row">
+          <a class="button primary" href="#projects">View Projects</a>
+          <a class="button" href="https://github.com/trey109231">GitHub</a>
+          <a class="button" href="resume.pdf">Resume PDF</a>
+        </div>
+      </div>
+      <aside class="hero-card">
+        <p class="card-label">Current focus</p>
+        <h2>Embedded + mixed-signal prototyping</h2>
+        <p>Firmware, Python tooling, signal generation/capture, PCB design, and bench validation for research-grade hardware.</p>
+        <div class="stat-grid">
+          <div><span class="stat">48</span><span class="stat-label">electrode outputs</span></div>
+          <div><span class="stat">DMA</span><span class="stat-label">ADC/DAC/timer workflows</span></div>
+          <div><span class="stat">PCB</span><span class="stat-label">prototype design + debug</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="projects" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Featured work</p>
+        <h2>Projects</h2>
+        <p>Four larger project pages covering my strongest hardware, firmware, tooling, and mixed-signal work. Smaller experiments are grouped into broader technical stories rather than listed as isolated one-off projects.</p>
+      </div>
+      <div class="project-grid">
+        <article class="project-card featured">
+          <div>
+            <p class="project-type">Mixed-signal R&D prototype</p>
+            <h3>48-Channel Intraspinal Stimulation Platform</h3>
+            <p>
+              A mixed-signal research prototype for intraspinal stimulation, combining analog
+              current-source/sink output stages, command-cap timing, electrode routing, measurement
+              paths, Python control tooling, AD3 timing validation, and a full PCB currently awaiting
+              parts and staged bring-up.
+            </p>
+          </div>
+          <ul class="tag-list">
+            <li>Mixed-signal design</li>
+            <li>PCB architecture</li>
+            <li>Python control</li>
+            <li>Bench validation</li>
+            <li>AD3 timing</li>
+          </ul>
+          <a class="text-link" href="projects/stimulator-platform.html">Read project summary →</a>
+        </article>
+
+        <article class="project-card featured">
+          <div>
+            <p class="project-type">Capstone / client project</p>
+            <h3>Cathodic Protection Rectifier Controller</h3>
+            <p>
+              A client-focused capstone project to retrofit an industrial cathodic-protection rectifier
+              with SCR phase control, measurement, logging, remote monitoring, and a web-based interface.
+              My work focused on firmware architecture, control logic, UI/software, PCB assembly, testing,
+              and troubleshooting.
+            </p>
+          </div>
+          <ul class="tag-list">
+            <li>Firmware</li>
+            <li>SCR control</li>
+            <li>Particle Boron</li>
+            <li>Web UI</li>
+            <li>Testing</li>
+          </ul>
+          <a class="text-link" href="projects/cathodic-rectifier-controller.html">Read project summary →</a>
+        </article>
+
+        <article class="project-card">
+          <p class="project-type">Embedded waveform generation progression</p>
+          <h3>AVR + STM32 Waveform Tools</h3>
+          <p>
+            A progression from manual AVR waveform generation with an external DAC and LCD/joystick UI
+            to an STM32 timer/DMA waveform-generation and ADC-capture tool with UART commands and
+            Python plotting.
+          </p>
+          <ul class="tag-list">
+            <li>AVR C</li>
+            <li>STM32</li>
+            <li>ADC/DAC</li>
+            <li>DMA</li>
+            <li>Python</li>
+          </ul>
+          <a class="text-link" href="projects/embedded-waveform-tools.html">Read project summary →</a>
+        </article>
+
+        <article class="project-card">
+          <p class="project-type">AD3 programming / embedded bring-up tools</p>
+          <h3>OpenAD3Flash: Microcontroller Programming & Flash Experiments</h3>
+          <p>
+            A collection of Analog Discovery 3 tools for AVR ISP, PIC high-voltage programming,
+            read-only glitch experiments, EEPROM/SPI flash dumping, and small runtime firmware tests.
+          </p>
+          <ul class="tag-list">
+            <li>AD3/WaveForms</li>
+            <li>AVR ISP</li>
+            <li>PIC HVP</li>
+            <li>SPI/I²C</li>
+            <li>Python</li>
+          </ul>
+          <a class="text-link" href="projects/openad3flash.html">Read project summary →</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="section compact-section">
+      <div class="section-heading">
+        <p class="eyebrow">Additional experiment</p>
+        <h2>Additional embedded systems experiment</h2>
+        <p>
+          A smaller project that demonstrates embedded networking, distributed scheduling, and hardware/software integration on very limited hardware.
+        </p>
+      </div>
+
+      <article class="project-card">
+        <p class="project-type">Distributed embedded computing</p>
+        <h3>Tiny AVR Mandelbrot Cluster</h3>
+        <p>
+          A five-node ATtiny84A render cluster controlled by an Analog Discovery 3. Each chip computes
+          Mandelbrot rows using fixed-point math, the Python host dynamically schedules work across
+          workers, and the final image is reconstructed as ASCII output.
+        </p>
+        <ul class="tag-list">
+          <li>ATtiny84A</li>
+          <li>Distributed scheduling</li>
+          <li>Fixed-point math</li>
+          <li>Shared SPI-style bus</li>
+          <li>AD3</li>
+        </ul>
+        <a class="text-link" href="projects/tiny-avr-mandelbrot-cluster.html">Read project summary →</a>
+      </article>
+    </section>
+
+    <section id="skills" class="section split">
+      <div>
+        <p class="eyebrow">Technical focus</p>
+        <h2>Skills</h2>
+        <p>My strongest area is embedded hardware/software integration: making firmware, instruments, PCBs, scripts, and bench measurements line up into a working system.</p>
+      </div>
+      <div class="skill-columns">
+        <div class="skill-box"><h3>Embedded & firmware</h3><p>STM32, Particle/nRF52, AVR, PIC, C/C++, Python tooling, UART/SPI/I²C, timers, DMA, ADC/DAC workflows.</p></div>
+        <div class="skill-box"><h3>Hardware & PCB</h3><p>Mixed-signal prototyping, analog output stages, rectifier/SCR control, routing/muxing, power rails, PCB assembly, bench debug.</p></div>
+        <div class="skill-box"><h3>Debug & validation</h3><p>Oscilloscopes, logic analyzers, WaveForms/AD3, driver profiling, waveform capture, calibration workflows, web/serial test tools.</p></div>
+        <div class="skill-box"><h3>Systems thinking</h3><p>Architecture tradeoffs, hardware/software boundaries, signal contracts, prototype-to-product planning.</p></div>
+      </div>
+    </section>
+
+    <section id="experience" class="section">
+      <div class="section-heading"><p class="eyebrow">Experience</p><h2>Selected engineering experience</h2></div>
+      <div class="timeline">
+        <div class="timeline-item"><div class="timeline-date">Recent</div><div><h3>Mixed-Signal Stimulation Prototype</h3><p>Built and validated hardware/software pieces for a multi-channel intraspinal stimulation platform, including analog output-stage testing, routing architecture, timing validation, Python control software, and PCB design work.</p></div></div>
+        <div class="timeline-item"><div class="timeline-date">Side projects</div><div><h3>Embedded tooling and firmware projects</h3><p>Developed small embedded systems and tools around AVR/STM32 waveform generation, PIC programming, and SPI flash analysis to sharpen low-level firmware and hardware debugging skills.</p></div></div>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact-card">
+      <p class="eyebrow">Contact</p>
+      <h2>Interested in embedded, hardware/firmware, and R&D prototype roles.</h2>
+      <p>The best way to reach me is through GitHub or LinkedIn. Replace these placeholder links with your final profiles.</p>
+      <div class="button-row"><a class="button primary" href="mailto:treyk@live.ca">Email</a><a class="button" href="https://github.com/trey109231">GitHub</a><a class="button" href="#">LinkedIn</a></div>
+    </section>
+  </main>
+
+  <footer class="footer"><p>© <span id="year"></span> Trey Kirscht. Built with plain HTML/CSS and hosted on GitHub Pages.</p></footer>
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>

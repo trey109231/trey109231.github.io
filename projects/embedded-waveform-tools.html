@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AVR + STM32 Waveform Tools | Trey Kirscht</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="../index.html">Trey Kirscht</a>
+      <div class="nav-links">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#skills">Skills</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="section project-page">
+    <p class="eyebrow">Embedded waveform generation progression</p>
+    <h1>AVR + STM32 Waveform Tools</h1>
+    <p class="hero-text">
+      A pair of embedded projects showing a progression from manual bare-metal waveform generation on
+      an AVR with an external DAC to a more production-style STM32 workflow using timers, circular DMA,
+      ADC capture, UART commands, and Python plotting.
+    </p>
+
+    <div class="project-meta">
+      <div class="meta-box">
+        <strong>Role</strong>
+        <span>Firmware, wiring, test tooling, and bench validation</span>
+      </div>
+      <div class="meta-box">
+        <strong>Result</strong>
+        <span>Generated and captured waveforms using both low-level MCU control and hardware-timed DMA.</span>
+      </div>
+      <div class="meta-box">
+        <strong>Status</strong>
+        <span>Public portfolio project; repo links and captures can be added once cleaned.</span>
+      </div>
+    </div>
+
+    <section class="content-block">
+      <h2>Why this project matters</h2>
+      <p>
+        This project pair shows the same core idea at two levels of abstraction.
+        The AVR version is intentionally close to the metal: a timer interrupt advances a phase
+        accumulator and writes samples to an external AD7528 DAC over a parallel GPIO bus. The STM32
+        version moves the real-time sample movement into hardware using timers and DMA, while the CPU
+        handles commands and host communication.
+      </p>
+    </section>
+
+    <section class="content-block">
+      <h2>Stage 1: AVR external-DAC waveform generator</h2>
+      <p>
+        The AVR version used an ATmega168A, an AD7528 external DAC, a 1602 LCD, joystick analog inputs,
+        and an LM358 output buffer. The firmware drove the DAC data bus directly from PORTD, used
+        Timer1 compare interrupts as the sample clock, and supported sine, square, ramp, and triangle
+        outputs through a small LCD/joystick UI.
+      </p>
+      <ul>
+        <li>ATmega168A firmware written in manual AVR C with direct register access.</li>
+        <li>AD7528 8-bit external DAC controlled through an 8-bit parallel bus and GPIO control lines.</li>
+        <li>Timer1 ISR advanced a phase accumulator and wrote samples at a fixed sample rate.</li>
+        <li>LCD/joystick UI controlled waveform type, frequency, amplitude, and run/stop state.</li>
+        <li>Shared-port LCD/DAC conflicts were handled with careful interrupt masking around LCD writes.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Stage 2: STM32 ADC/DAC DMA loopback tool</h2>
+      <p>
+        The STM32 version used a NUCLEO-L432KC to generate DAC waveforms on PA4 and capture them back
+        on PA0. TIM6 triggered DAC updates from a 256-sample waveform table through circular DMA, while
+        TIM2 triggered ADC conversions into a circular DMA buffer. A UART command interface controlled
+        waveform type, frequency, amplitude, offset, ADC sample rate, and binary capture transfer to a
+        Python plotting script.
+      </p>
+      <ul>
+        <li>TIM6 → DAC trigger → DMA transfer from waveform table to DAC register.</li>
+        <li>TIM2 → ADC trigger → DMA transfer from ADC register into capture buffer.</li>
+        <li>UART command interface for waveform/capture control at 921600 baud.</li>
+        <li>Python host tool parsed binary ADC captures and plotted voltage vs. time.</li>
+        <li>Demonstrated a more serious embedded workflow using CubeMX/HAL, timers, DMA, and host tooling.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Technical comparison</h2>
+      <div class="project-meta">
+        <div class="meta-box">
+          <strong>AVR version</strong>
+          <span>CPU ISR writes each DAC sample directly. Excellent for learning the mechanics.</span>
+        </div>
+        <div class="meta-box">
+          <strong>STM32 version</strong>
+          <span>Timers and DMA move samples in hardware. CPU handles configuration and communication.</span>
+        </div>
+        <div class="meta-box">
+          <strong>Progression</strong>
+          <span>Manual sample loop → hardware-timed sample engine with capture and plotting.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-block">
+      <h2>Tools & technologies</h2>
+      <ul class="tag-list">
+        <li>ATmega168A</li>
+        <li>AVR C</li>
+        <li>AD7528 DAC</li>
+        <li>LCD1602</li>
+        <li>STM32L432KC</li>
+        <li>CubeMX/HAL</li>
+        <li>TIM2/TIM6</li>
+        <li>ADC/DAC DMA</li>
+        <li>UART</li>
+        <li>Python</li>
+        <li>Matplotlib</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Next additions</h2>
+      <p>
+        Add oscilloscope captures from the AVR version, the STM32 Python waveform plot, wiring photos,
+        and links to public GitHub repos once cleaned. This page can act as a single stronger project
+        instead of splitting the AVR and STM32 projects into two smaller entries.
+      </p>
+    </section>
+
+    <a class="button" href="../index.html#projects">← Back to projects</a>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> Trey Kirscht.</p>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
