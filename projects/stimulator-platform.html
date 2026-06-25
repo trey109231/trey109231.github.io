@@ -82,6 +82,27 @@
       </ul>
     </section>
 
+
+    <section class="content-block">
+      <h2>Power and compliance configuration</h2>
+      <p>
+        The output-stage hardware supports both lower-voltage AD3-powered testing and higher-compliance
+        external rail testing. Early one-channel validation could be performed from the AD3's approximate
+        ±5 V supplies, but higher-load testing required external rails around ±7.8 V to maintain current
+        regulation without clipping or droop.
+      </p>
+      <p>
+        This rail selection became an important part of the validation workflow. For example, 300 µA through
+        a 20 kΩ load requires roughly 6 V across the load before allowing for output-stage overhead, so that
+        condition belongs in the external-rail configuration rather than the AD3-only rail configuration.
+      </p>
+      <ul>
+        <li><strong>AD3 ±5 V rails:</strong> useful for safer early testing, lower-compliance checks, and initial one-channel validation.</li>
+        <li><strong>External ±7.8 V rails:</strong> used for higher-load compliance testing and final-board operating conditions.</li>
+        <li><strong>Software setting:</strong> the selected rail mode must match the actual hardware setup before running pulse trains.</li>
+      </ul>
+    </section>
+
     <section class="content-block">
       <h2>Architecture selection</h2>
       <p>
@@ -111,6 +132,30 @@
           <span>Eight feedback-controlled sampled-command lanes routed through AD75019 crosspoints.</span>
         </div>
       </div>
+    </section>
+
+
+    <section class="content-block">
+      <h2>Constraint-driven architecture</h2>
+      <p>
+        A major part of this project was not simply building a waveform generator, but first characterizing
+        the constraints that determined what kind of architecture was feasible. The final design was driven
+        by measured timing limits, compliance-voltage requirements, channel-count requirements, measurement
+        needs, PCB implementation constraints, and the practical behavior of the AD3/WaveForms stack.
+      </p>
+      <p>
+        The resulting architecture uses eight active stimulation lanes routed to 48 electrode outputs, rather
+        than 48 fully independent output stages. That tradeoff matched the expected stimulation use case,
+        reduced hardware complexity, and kept the PCB and control problem manageable while still supporting
+        multiple active channels at a time.
+      </p>
+      <ul>
+        <li><strong>Timing:</strong> pulse timing and command-capacitor updates had to be hardware-timed, not dependent on live Python/USB updates.</li>
+        <li><strong>Compliance:</strong> higher-impedance loads required external rails around ±7.8 V instead of relying only on the AD3 ±5 V rails.</li>
+        <li><strong>Routing:</strong> the system needed many addressable electrodes, but only a smaller number of simultaneously active lanes.</li>
+        <li><strong>Measurement:</strong> the design needed a practical muxed readback path for selected voltage/current validation without duplicating full measurement hardware per electrode.</li>
+        <li><strong>Implementation:</strong> PCB size, layer count, safety defaults, connector choices, and bring-up risk shaped the final partitioning.</li>
+      </ul>
     </section>
 
     <section class="content-block">
@@ -183,6 +228,31 @@
         used to validate timing, polarity sequencing, command-cap behavior, and output-stage response.
       </figcaption>
     </figure>
+
+
+    <section class="content-block">
+      <h2>AD3 and WaveForms characterization</h2>
+      <p>
+        The AD3 was treated as a timing-critical part of the system rather than a generic lab instrument.
+        I built profiling and validation tools to understand what the device and WaveForms/DWF driver could
+        reliably do for synchronized analog output, digital output, capture, and reload timing.
+      </p>
+      <p>
+        This included profiling individual DWF API calls and inspecting relevant driver call paths in Ghidra
+        to back up the timing measurements. That work separated low-cost local staging calls from expensive
+        configure, status, and readback boundaries. Those findings directly informed the software architecture:
+        analog and digital frames are precompiled and hardware-timed, repeated output paths use cache/reload
+        strategies where safe, and scope readback is treated as a measurement path rather than part of the
+        real-time control loop.
+      </p>
+      <ul>
+        <li>Validated synchronized W1/W2 AnalogOut and DigitalOut frame behavior for pulse and cap-write timing.</li>
+        <li>Characterized DWF driver overhead to distinguish cheap data-staging calls from expensive commit/status/readback calls.</li>
+        <li>Fixed dual AnalogOut frame-packing behavior after duplicated buffers compressed waveform timing and shifted DIO write windows.</li>
+        <li>Benchmarked reload-only update paths separately from scope capture overhead to evaluate feasibility for 100 Hz stimulation updates.</li>
+        <li>Explored a C++ worker backend as a faster execution path, then kept the Python backend as the validated prototype workflow when it proved sufficient.</li>
+      </ul>
+    </section>
 
     <section class="content-block">
       <h2>PCB implementation</h2>
@@ -266,7 +336,7 @@
 <section class="content-block">
       <h2>What this project demonstrates</h2>
       <p>
-        This project demonstrates end-to-end hardware/software ownership: evaluating
+        This project demonstrates constraint-driven hardware/software ownership: evaluating
         architectures, rejecting designs based on real limitations, validating one-channel analog hardware,
         profiling the timing toolchain, selecting parts, laying out a dense mixed-signal PCB, reviewing
         manufacturing files, and preparing a realistic staged bring-up plan.
