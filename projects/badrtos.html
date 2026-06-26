@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BadRTOS: Preemptive AVR RTOS | Trey Kirscht</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="../index.html">Trey Kirscht</a>
+      <div class="nav-links">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#skills">Skills</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="section project-page">
+    <p class="eyebrow">RTOS internals · PIC/AVR assembly · hardware validated</p>
+    <h1>BadRTOS: Preemptive AVR RTOS</h1>
+    <p class="hero-text">
+      A small real-time operating-system lineage that began with a PIC16F84A TinyRTOS-style assembly
+      runtime, then evolved through ATmega168A scheduler experiments into a preemptive ATmega328P RTOS.
+      The PIC version used a Timer0 tick, countdown-based cooperative task timing, heartbeat modes,
+      debounced button input, software PWM, and bit-banged UART telemetry. The final AVR version implements
+      timer-driven preemptive scheduling, manual context switching, separate task stacks, delays, semaphores,
+      mutexes with priority inheritance, mailbox IPC, stack high-water monitoring, and UART diagnostics, then
+      validates those features on real hardware using GPIO traces and serial status output.
+    </p>
+
+    <div class="button-row compact">
+      <a class="button primary" href="https://github.com/trey109231/badRTOS">View on GitHub</a>
+      <a class="button" href="../index.html#projects">Back to projects</a>
+    </div>
+
+    <div class="project-meta">
+      <div class="meta-box">
+        <strong>Role</strong>
+        <span>Built the PIC16F84A TinyRTOS-style assembly runtime, then implemented the AVR preemptive kernel, context-switch port, synchronization primitives, demo firmware, and hardware validation workflow.</span>
+      </div>
+      <div class="meta-box">
+        <strong>Platform</strong>
+        <span>PIC16F84A assembly runtime; ATmega168A scheduler experiments; final ATmega328P Xplained Mini at 16 MHz with AVR GCC, Timer1 tick ISR, mEDBG UART, and Analog Discovery 3 monitor.</span>
+      </div>
+      <div class="meta-box">
+        <strong>Core result</strong>
+        <span>Hardware-validated a working preemptive RTOS with synchronization, IPC, priority inheritance, stack monitoring, and UART diagnostics.</span>
+      </div>
+    </div>
+
+    <section class="content-block">
+      <h2>Project motivation</h2>
+      <p>
+        The goal of BadRTOS was to understand RTOS behavior from the implementation side rather than only
+        using an existing API. Most production embedded projects should use a proven kernel such as FreeRTOS
+        or Zephyr, but building a small kernel from scratch makes the underlying failure modes much clearer:
+        stack corruption, ISR preemption, context-save bugs, priority inversion, blocking behavior, and timing
+        assumptions are no longer hidden behind library calls.
+      </p>
+      <p>
+        This project complements my hardware-heavy embedded work by demonstrating the lower-level computer
+        science pieces of embedded systems: scheduling, concurrency, resource ownership, inter-task
+        communication, priority handling, and runtime safety checks.
+      </p>
+    </section>
+
+    <section class="content-block">
+      <h2>Project lineage: PIC cooperative runtime to AVR preemptive RTOS</h2>
+      <p>
+        BadRTOS did not start directly as a full preemptive AVR kernel. The proven precursor was a
+        PIC16F84A TinyRTOS-style bring-up runtime written in assembly. It used a Timer0 interrupt for a
+        roughly 4 ms tick, maintained a 16-bit uptime counter, decremented task countdown timers in the ISR,
+        and ran a cooperative foreground loop for heartbeat, button, and telemetry tasks.
+      </p>
+      <p>
+        That PIC runtime drove a bit-banged 4800-baud UART TX line on RB0, an active-low heartbeat LED on RB1,
+        a debounced active-high button on RB2, and an active-low software PWM LED on RB3. Button presses incremented
+        a counter and cycled both heartbeat mode and PWM mode, while periodic UART telemetry reported tick count,
+        heartbeat state, button state, press count, heartbeat mode, and PWM mode.
+      </p>
+      <p>
+        The PIC step is worth including because the PIC16F84A is an extremely constrained old part with no hardware
+        UART, limited RAM, awkward banking, and old tooling. Implementing the tiny runtime required direct register
+        control, interrupt context save/restore, software timers, debouncing, software PWM, and cycle-counted UART
+        framing before moving into the AVR scheduler work.
+      </p>
+      <p>
+        From there, the work moved to AVR scheduler experiments. The ATmega168A version explored real preemption and
+        separate task stacks, but SRAM pressure made the full feature set unreliable. Moving to the ATmega328P provided
+        enough RAM to finish the preemptive scheduler, blocking primitives, mailbox IPC, priority inheritance, stack
+        monitoring, and UART diagnostics.
+      </p>
+      <div class="button-row compact">
+        <a class="button" href="../assets/badrtos/pic16f84a-tinyrtos-pwm-runtime.asm">View PIC16F84A TinyRTOS-style runtime ASM</a>
+      </div>
+    </section>
+
+    <section class="content-block">
+      <h2>Implemented features</h2>
+      <ul>
+        <li>PIC16F84A TinyRTOS-style assembly runtime with Timer0 tick, cooperative countdown timers, heartbeat modes, debounced button input, software PWM, press counting, and bit-banged 4800-baud UART telemetry.</li>
+        <li>Timer-driven preemptive scheduling on AVR using a Timer1 compare interrupt.</li>
+        <li>Manual AVR context switching in naked assembly, including register, stack pointer, and SREG handling.</li>
+        <li>Static task creation with independent per-task stacks and fake initial stack frames.</li>
+        <li>Priority-based scheduling with equal-priority round-robin behavior.</li>
+        <li>Cooperative yield plus sleep/delay wakeups.</li>
+        <li>Counting semaphores with blocking wait and post behavior.</li>
+        <li>Mutex lock/unlock with priority inheritance for blocked high-priority waiters.</li>
+        <li>Fixed-size mailbox/queue IPC with blocking send/receive and non-blocking helper functions.</li>
+        <li>Stack high-water scanning, minimum-free tracking, and hardware-visible stack fault output.</li>
+        <li>UART runtime status dump showing ticks, counters, task states, priorities, and stack usage.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>System architecture</h2>
+      <p>
+        BadRTOS uses a small static task table. Each task owns a stack filled with a known pattern so the
+        kernel can later estimate high-water usage. When a task is created, the kernel builds an initial
+        fake context frame on that stack. The AVR restore path can then enter the task as if it had already
+        been interrupted and resumed.
+      </p>
+      <p>
+        The scheduler runs from two paths: a cooperative yield path and a Timer1 ISR preemption path. Both
+        save the current CPU context, update the current task's saved stack pointer, select the next runnable
+        task by effective priority, load the selected task's stack pointer, and restore the saved context.
+      </p>
+      <ul class="tag-list">
+        <li>static allocation</li>
+        <li>separate stacks</li>
+        <li>Timer1 tick</li>
+        <li>effective priority</li>
+        <li>blocked wait masks</li>
+        <li>stack high-water checks</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Synchronization and IPC</h2>
+      <p>
+        Semaphores, mutexes, and mailboxes are implemented using the same core pattern: enter a critical
+        section, check whether the operation can complete immediately, block the current task if it cannot,
+        record the waiting task in the object's wait mask, and wake the highest-priority eligible task when
+        the object's state changes.
+      </p>
+      <p>
+        The mutex implementation includes priority inheritance. When a high-priority task blocks on a mutex
+        owned by a lower-priority task, the owner temporarily inherits the higher effective priority. The
+        scheduler uses effective priority when choosing the next task, so the low-priority owner can run,
+        finish the protected section, and release the mutex instead of being starved by unrelated work.
+      </p>
+    </section>
+
+    <section class="content-block">
+      <h2>Hardware validation</h2>
+      <p>
+        The final integration demo exposes key RTOS events on GPIO pins and also prints a UART status report.
+        This made the test observable from both outside the chip and inside the kernel. The Analog Discovery 3
+        monitor captures mailbox, semaphore, mutex, tick, busy-task, and stack-fault behavior, while UART shows
+        task states, priorities, counters, and stack free space.
+      </p>
+      <div class="project-meta">
+        <div class="meta-box">
+          <strong>GPIO validation</strong>
+          <span>Mailbox send/receive, semaphore take, mutex priority inheritance, Timer1 tick, busy-task scheduling, high-priority mutex acquire, and stack fault pin.</span>
+        </div>
+        <div class="meta-box">
+          <strong>UART validation</strong>
+          <span>Readable 9600 baud runtime report with rising IPC/synchronization counters, task states, effective priorities, and stack high-water values.</span>
+        </div>
+        <div class="meta-box">
+          <strong>Important result</strong>
+          <span>A true non-yielding CPU-hog task can run without freezing the system because the timer ISR preempts it.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-block">
+      <h2>Final integration test</h2>
+      <p>The final demo runs multiple tasks at the same time:</p>
+      <ul>
+        <li><strong>UART status task:</strong> prints a periodic kernel/task status report.</li>
+        <li><strong>Mailbox producer:</strong> sends bytes into the mailbox and posts a semaphore.</li>
+        <li><strong>Mailbox consumer:</strong> waits on the semaphore, receives bytes, and toggles a receive event pin.</li>
+        <li><strong>Low-priority mutex owner:</strong> holds a mutex long enough to create a priority inversion case.</li>
+        <li><strong>High-priority mutex task:</strong> blocks on the mutex, forces priority inheritance, then acquires it.</li>
+        <li><strong>Non-yielding busy task:</strong> spins forever without calling yield or delay, proving timer preemption works.</li>
+      </ul>
+      <p>
+        This combined test validates the intended feature set: preemption, delays, blocking states, semaphore
+        post/take, mailbox send/receive, mutex lock/unlock, priority inheritance, stack monitoring, and UART
+        diagnostics.
+      </p>
+    </section>
+
+    <section class="content-block">
+      <h2>What I learned</h2>
+      <p>
+        The PIC version was a useful first step because it made software UART timing, clock assumptions,
+        interrupt-driven timing, cooperative task structure, debouncing, software PWM, manual bring-up,
+        and old-MCU tooling constraints concrete on a very limited part. The most difficult
+        step after that was moving from simple foreground firmware into real preemptive context switching.
+        Higher-level primitives like semaphores and queues are mostly kernel bookkeeping once stack switching and
+        scheduling are reliable. The fragile parts were the
+        AVR details: how the return address sits on the stack, how SREG is saved and restored, how an ISR-created
+        context differs from a cooperative yield context, and how quickly SRAM pressure can create misleading
+        failures on small MCUs.
+      </p>
+      <p>
+        The project made RTOS APIs much less abstract. A call like <code>delay</code>, <code>semaphore wait</code>,
+        <code>queue receive</code>, or <code>mutex lock</code> maps directly to task states, wait objects, stack frames,
+        effective priorities, and scheduler decisions.
+      </p>
+    </section>
+
+    <section class="content-block">
+      <h2>Validation status</h2>
+      <ul>
+        <li>PIC16F84A TinyRTOS-style cooperative runtime: implemented and validated as the known-good PIC precursor milestone.</li>
+        <li>Preemptive context switching: tested on hardware.</li>
+        <li>Cooperative yield: tested on hardware.</li>
+        <li>Task sleep/delay wakeups: tested on hardware.</li>
+        <li>Priority scheduling: tested on hardware.</li>
+        <li>Non-yielding task preemption: tested on hardware.</li>
+        <li>Counting semaphore: tested on hardware.</li>
+        <li>Mutex lock/unlock: tested on hardware.</li>
+        <li>Priority inheritance: tested on hardware.</li>
+        <li>Mailbox IPC: tested on hardware.</li>
+        <li>Stack high-water and fault guard: tested on hardware.</li>
+        <li>UART status output: tested on hardware.</li>
+      </ul>
+      <p class="project-status-note">
+        <strong>Note:</strong> This is an educational and portfolio RTOS, not a production-certified kernel.
+        It is hardware validated against the intended feature demos, but it is not formally verified and does
+        not attempt to cover every edge case of a production RTOS.
+      </p>
+    </section>
+
+    <a class="button" href="../index.html#projects">← Back to projects</a>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> Trey Kirscht.</p>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

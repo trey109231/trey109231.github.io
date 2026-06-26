@@ -25,7 +25,7 @@
       <div class="section-heading">
         <p class="eyebrow">Featured work</p>
         <h2>Projects</h2>
-        <p>Four larger project pages covering my strongest hardware, firmware, tooling, and mixed-signal work. Smaller experiments are grouped into broader technical stories rather than listed as isolated one-off projects.</p>
+        <p>Selected project pages covering my strongest hardware, firmware, tooling, RTOS, and mixed-signal work. Smaller experiments are grouped into broader technical stories rather than listed as isolated one-off projects.</p>
       </div>
       <div class="project-grid">
         <article class="project-card featured">
@@ -68,6 +68,26 @@
             <li>Testing</li>
           </ul>
           <a class="text-link" href="projects/cathodic-rectifier-controller.html">Read project summary →</a>
+        </article>
+
+        <article class="project-card">
+          <p class="project-type">RTOS / embedded systems internals</p>
+          <h3>BadRTOS: Preemptive AVR RTOS</h3>
+          <p>
+            A small RTOS lineage that began with a PIC16F84A TinyRTOS-style assembly runtime using
+            a Timer0 tick, cooperative task timing, heartbeat modes, debounced button input, software PWM,
+            and bit-banged UART telemetry, then grew into a preemptive ATmega328P RTOS in C and AVR assembly
+            with task stacks, semaphores, mutex priority inheritance, mailbox IPC, stack monitoring, UART diagnostics,
+            and hardware validation.
+          </p>
+          <ul class="tag-list">
+            <li>PIC TinyRTOS</li>
+            <li>RTOS internals</li>
+            <li>Mutex PI</li>
+            <li>IPC</li>
+            <li>Hardware validation</li>
+          </ul>
+          <a class="text-link" href="projects/badrtos.html">Read project summary →</a>
         </article>
 
         <article class="project-card">
@@ -142,10 +162,10 @@
         <p>My strongest area is embedded hardware/software integration: making firmware, instruments, PCBs, scripts, and bench measurements line up into a working system.</p>
       </div>
       <div class="skill-columns">
-        <div class="skill-box"><h3>Embedded & firmware</h3><p>STM32, Particle/nRF52, AVR, PIC, C/C++, Python tooling, UART/SPI/I²C, timers, DMA, ADC/DAC workflows.</p></div>
+        <div class="skill-box"><h3>Embedded & firmware</h3><p>STM32, Particle/nRF52, AVR, PIC, C/C++, AVR/PIC assembly, Python tooling, UART/SPI/I²C, timers, DMA, ADC/DAC workflows, RTOS primitives.</p></div>
         <div class="skill-box"><h3>Hardware & PCB</h3><p>Mixed-signal prototyping, analog output stages, rectifier/SCR control, routing/muxing, power rails, PCB assembly, bench debug.</p></div>
         <div class="skill-box"><h3>Debug & validation</h3><p>Oscilloscopes, logic analyzers, WaveForms/AD3, driver profiling, waveform capture, calibration workflows, web/serial test tools.</p></div>
-        <div class="skill-box"><h3>Systems thinking</h3><p>Architecture tradeoffs, hardware/software boundaries, signal contracts, prototype-to-product planning.</p></div>
+        <div class="skill-box"><h3>Systems thinking</h3><p>Architecture tradeoffs, hardware/software boundaries, signal contracts, scheduling/concurrency, prototype-to-product planning.</p></div>
       </div>
     </section>
 
@@ -153,7 +173,7 @@
       <div class="section-heading"><p class="eyebrow">Experience</p><h2>Selected engineering experience</h2></div>
       <div class="timeline">
         <div class="timeline-item"><div class="timeline-date">Recent</div><div><h3>Mixed-Signal Stimulation Prototype</h3><p>Built and validated hardware/software pieces for a multi-channel intraspinal stimulation platform, including analog output-stage testing, routing architecture, timing validation, Python control software, and PCB design work.</p></div></div>
-        <div class="timeline-item"><div class="timeline-date">Side projects</div><div><h3>Embedded tooling and firmware projects</h3><p>Developed small embedded systems and tools around AVR/STM32 waveform generation, PIC programming, and SPI flash analysis to sharpen low-level firmware and hardware debugging skills.</p></div></div>
+        <div class="timeline-item"><div class="timeline-date">Side projects</div><div><h3>Embedded tooling and firmware projects</h3><p>Developed embedded systems and tools around a PIC-to-AVR RTOS progression, AVR/STM32 waveform generation, PIC programming, and SPI flash analysis to sharpen low-level firmware, concurrency, and hardware debugging skills.</p></div></div>
       </div>
     </section>
 
