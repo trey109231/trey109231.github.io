@@ -67,3 +67,60 @@
 .project-status-note strong {
   color: var(--text);
 }
+
+.figure-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 2rem 0 3rem;
+}
+
+.figure-grid.two-up {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.figure-grid .project-figure {
+  margin: 0;
+}
+
+.validation-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255,255,255,.035);
+}
+
+.validation-table th,
+.validation-table td {
+  padding: .9rem 1rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.validation-table th {
+  color: var(--text);
+  background: rgba(125, 211, 252, .08);
+}
+
+.validation-table td {
+  color: var(--muted);
+}
+
+.validation-table tr:last-child td {
+  border-bottom: 0;
+}
+
+code {
+  color: var(--accent);
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--line);
+  padding: .1rem .35rem;
+  border-radius: .4rem;
+}
+
+@media(max-width:820px){
+  .figure-grid.two-up{grid-template-columns:1fr}
+}

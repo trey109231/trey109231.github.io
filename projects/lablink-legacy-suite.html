@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LabLink: Legacy Instrument Control Suite | Trey Kirscht</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="../index.html">Trey Kirscht</a>
+      <div class="nav-links">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#skills">Skills</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="section project-page">
+    <p class="eyebrow">Lab automation · SCPI · VXI-11 · USB/VISA · RS-232</p>
+    <h1>LabLink: Legacy Instrument Control Suite</h1>
+    <p class="hero-text">
+      A modular Python/Streamlit control suite for bringing older but still-capable lab instruments into
+      a modern workflow. LabLink controls an Agilent/HP Infiniium oscilloscope over LAN/VXI-11, a
+      Keysight/Agilent 33522B waveform generator over USB/VISA, and a Keithley 6487 picoammeter over
+      RS-232 serial, with safe instrument-specific workflows, command logging, and data export.
+    </p>
+
+    <div class="button-row compact">
+      <a class="button primary" href="https://github.com/trey109231/labLink">View on GitHub</a>
+      <a class="button" href="../index.html#projects">Back to projects</a>
+    </div>
+
+    <div class="project-meta">
+      <div class="meta-box">
+        <strong>Role</strong>
+        <span>Designed the driver architecture, Streamlit dashboard, SCPI workflows, logging/export tools, and hardware validation process.</span>
+      </div>
+      <div class="meta-box">
+        <strong>Interfaces</strong>
+        <span>LAN/VXI-11 for the Infiniium scope, USB/VISA for the 33522B waveform generator, and RS-232 for the Keithley 6487.</span>
+      </div>
+      <div class="meta-box">
+        <strong>Result</strong>
+        <span>Hardware-validated across all three real instruments with clean command logs and no query-protocol errors.</span>
+      </div>
+    </div>
+
+    <section class="content-block">
+      <h2>Project overview</h2>
+      <p>
+        LabLink started as a practical lab need: make legacy bench equipment easier to use without replacing
+        it. The instruments were already available, but each used a different communication path and each had
+        its own quirks. Rather than write one-off scripts, I built a combined control layer with shared ideas:
+        strict command/query separation, visible SCPI traffic, safe defaults, instrument-specific setup helpers,
+        and data export for measurement work.
+      </p>
+      <p>
+        The project is intentionally resourceful. It uses instruments, adapters, and bench hardware that were
+        already available and turns them into a usable modern test interface. The result is not just a UI wrapper;
+        it is a small legacy lab-instrument stack that respects the stateful behavior of older equipment.
+      </p>
+    </section>
+
+    <section class="content-block">
+      <h2>Supported instruments</h2>
+      <div class="project-meta">
+        <div class="meta-box">
+          <strong>Agilent/HP Infiniium scope</strong>
+          <span>LAN/VXI-11 control, acquisition state management, channel/timebase setup, waveform export, continuous measurement statistics, and raw SCPI diagnostics.</span>
+        </div>
+        <div class="meta-box">
+          <strong>Keysight/Agilent 33522B AWG</strong>
+          <span>USB/VISA connection, two-channel waveform setup, output safety controls, presets, sweeps, raw SCPI, and log/export tooling.</span>
+        </div>
+        <div class="meta-box">
+          <strong>Keithley 6487 picoammeter</strong>
+          <span>RS-232 proof-of-concept driver with IDN, safe current setup, current reads, CSV logging, error queue handling, and guarded voltage-source controls.</span>
+        </div>
+      </div>
+    </section>
+
+    <figure class="project-figure wide">
+      <img src="../assets/lablink/lablink-scope-stats-ui.png" alt="LabLink Infiniium scope statistics tab showing parsed measurement statistics from the scope.">
+      <figcaption>
+        <strong>Infiniium continuous measurement-statistics workflow.</strong>
+        The scope tab defines measurement rows using the instrument's native continuous-statistics path, then
+        reads and parses scope-generated measurement results rather than forcing repeated one-shot captures.
+      </figcaption>
+    </figure>
+
+    <section class="content-block">
+      <h2>Why this was more than sending SCPI strings</h2>
+      <p>
+        The biggest challenge was learning how to talk to older instruments without making them recover from
+        bad command structure. The Infiniium oscilloscope was especially stateful: early versions produced
+        delays and query errors because commands and queries were not always sequenced the way the scope
+        expected. The fix was to treat the instrument as a state machine, not a stateless endpoint.
+      </p>
+      <ul>
+        <li>Separated non-query writes from query reads so commands like <code>:RUN</code> never wait for nonexistent responses.</li>
+        <li>Consumed query responses before sending new program messages, avoiding query-interrupted/unterminated states.</li>
+        <li>Explicitly set trigger sweep before <code>:RUN</code> so the scope did not remain stuck in single-sweep behavior.</li>
+        <li>Used source-first continuous measurement definitions because the older Infiniium firmware handled that path more reliably.</li>
+        <li>Matched serial terminators and measurement state on the Keithley before using <code>:READ?</code>.</li>
+        <li>Kept outputs safe by default on the AWG and by guarding the 6487's voltage-source enable path.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Architecture</h2>
+      <p>
+        LabLink is split into instrument drivers and a combined Streamlit app. Each driver exposes a small set
+        of instrument-specific helpers on top of low-level <code>write()</code> and <code>ask()</code> methods, while the UI presents
+        practical bench workflows instead of a giant flat SCPI command list.
+      </p>
+      <div class="project-meta">
+        <div class="meta-box">
+          <strong>Transport layer</strong>
+          <span>VXI-11/LAN, USB/VISA, and pyserial RS-232 communication with per-instrument connection settings.</span>
+        </div>
+        <div class="meta-box">
+          <strong>Instrument layer</strong>
+          <span>Infiniium, 33522B, and 6487 drivers with safe setup helpers and command/query discipline.</span>
+        </div>
+        <div class="meta-box">
+          <strong>Workflow layer</strong>
+          <span>Streamlit tabs for scope, AWG, picoammeter, unified command logs, exports, and quickstart notes.</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="figure-grid two-up">
+      <figure class="project-figure">
+        <img src="../assets/lablink/lablink-awg-ui.png" alt="LabLink 33522B waveform generator tab connected over USB/VISA with two-channel controls.">
+        <figcaption>
+          <strong>33522B USB/VISA control tab.</strong>
+          The AWG workflow includes connection status, output state, two-channel setup, output-off safety, presets, sweeps, and command logging.
+        </figcaption>
+      </figure>
+      <figure class="project-figure">
+        <img src="../assets/lablink/lablink-keithley-ui.png" alt="LabLink Keithley 6487 picoammeter tab connected over RS-232 with current logging table.">
+        <figcaption>
+          <strong>Keithley 6487 RS-232 validation tab.</strong>
+          The picoammeter driver demonstrates serial SCPI communication, safe current setup, fA-level readout, CSV logging, and error-queue checks.
+        </figcaption>
+      </figure>
+    </div>
+
+    <section class="content-block">
+      <h2>Hardware validation</h2>
+      <p>
+        The combined suite was tested against all three real instruments. The goal was not just to get an
+        ID string back, but to confirm each workflow could connect, configure the instrument, perform a useful
+        action, log cleanly, and exit safely.
+      </p>
+      <table class="validation-table">
+        <thead>
+          <tr>
+            <th>Instrument</th>
+            <th>Interface</th>
+            <th>Validated workflow</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Agilent/HP Infiniium 54845A oscilloscope</td>
+            <td>LAN / VXI-11</td>
+            <td>Connect, run/stop/single, channel setup, continuous statistics, waveform/measurement logging.</td>
+          </tr>
+          <tr>
+            <td>Keysight/Agilent 33522B waveform generator</td>
+            <td>USB / VISA</td>
+            <td>Connect, configure sine output, enable/disable outputs, read status/error state.</td>
+          </tr>
+          <tr>
+            <td>Keithley 6487 picoammeter</td>
+            <td>RS-232 serial</td>
+            <td>Connect at 57.6 kbaud 8N1 LF, configure current mode, read fA-level current, export CSV.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="figure-grid two-up">
+      <figure class="project-figure">
+        <img src="../assets/lablink/lablink-awg-bench.jpg" alt="Bench validation setup with a Keysight 33522B waveform generator and Tektronix oscilloscope showing a sine wave.">
+        <figcaption>
+          <strong>AWG bench validation.</strong>
+          The 33522B waveform generator was controlled from LabLink and verified on a separate oscilloscope.
+        </figcaption>
+      </figure>
+      <figure class="project-figure">
+        <img src="../assets/lablink/lablink-infiniium-bench.jpg" alt="Agilent Infiniium oscilloscope screen showing a captured square wave during LabLink validation.">
+        <figcaption>
+          <strong>Infiniium hardware validation.</strong>
+          The scope still runs its own acquisition and measurement engine; LabLink provides a cleaner control and logging layer around it.
+        </figcaption>
+      </figure>
+    </div>
+
+    <figure class="project-figure wide">
+      <img src="../assets/lablink/lablink-scope-setup-ui.png" alt="LabLink Infiniium setup tab showing channel setup and timebase controls.">
+      <figcaption>
+        <strong>Infiniium setup workflow in the combined dashboard.</strong>
+        The scope UI keeps slower setup actions, acquisition control, statistics, waveform export, and raw SCPI diagnostics separated so the old instrument is not hammered with unnecessary commands.
+      </figcaption>
+    </figure>
+
+    <section class="content-block">
+      <h2>What this project demonstrates</h2>
+      <ul>
+        <li>Practical Python driver design for real lab hardware rather than simulated devices.</li>
+        <li>SCPI command handling across three common legacy communication methods: LAN/VXI-11, USB/VISA, and RS-232.</li>
+        <li>Debugging with command logs, instrument manuals, error queues, and real hardware behavior.</li>
+        <li>Safe hardware defaults: output-off controls, guarded high-voltage source enable, and explicit acquisition states.</li>
+        <li>Resourcefulness: turning available legacy instruments and adapters into a coherent bench automation tool.</li>
+        <li>Packaging a collection of working drivers into a single portfolio-ready lab automation suite.</li>
+      </ul>
+    </section>
+
+    <section class="content-block">
+      <h2>Final result</h2>
+      <p>
+        LabLink became the missing test-automation piece in my portfolio. It complements my firmware and PCB
+        projects by showing that I can also build the tools needed to control instruments, validate hardware,
+        record data, and make a messy real-world bench setup more usable.
+      </p>
+    </section>
+
+    <a class="button" href="../index.html#projects">← Back to projects</a>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> Trey Kirscht.</p>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
