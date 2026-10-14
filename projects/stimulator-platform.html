@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>48-Channel Intraspinal Stimulation Platform | Trey Kirscht</title>
+  <title>48-Electrode Intraspinal Stimulation Platform | Trey Kirscht</title>
   <link rel="stylesheet" href="../styles.css">
 </head>
 
@@ -21,22 +21,22 @@
 
   <main class="section project-page">
     <p class="eyebrow">Mixed-signal R&D prototype · Centrepiece project</p>
-    <h1>48-Channel Intraspinal Stimulation Platform</h1>
+    <h1>48-Electrode Intraspinal Stimulation Platform</h1>
     <p class="hero-text">
       A routed eight-lane waveform-generator architecture for a 48-channel intraspinal stimulation
       research system. The project combines analog current-output design, sampled command-capacitor
       timing, AD3-based hardware-timed waveform control, crosspoint electrode routing, muxed measurement,
-      PCB implementation, and staged hardware bring-up planning.
+      PCB implementation, completed board bring-up, and multi-lane validation.
     </p>
 
     <div class="project-meta">
       <div class="meta-box">
         <strong>Role</strong>
-        <span>Architecture evaluation, circuit validation, software timing tests, component selection, schematic/PCB layout, DFM review, and bring-up planning</span>
+        <span>System architecture, analog design, schematic/PCB layout, assembly/rework, operator software, and bench validation</span>
       </div>
       <div class="meta-box">
         <strong>Status</strong>
-        <span>PCB and parts have been ordered; staged hardware bring-up will begin once they arrive.</span>
+        <span>Rev-1 bench prototype completed and validated; FPGA-based Rev-2 development is ongoing.</span>
       </div>
       <div class="meta-box">
         <strong>Core result</strong>
@@ -295,39 +295,20 @@
       </div>
     </section>
 
-    <section class="content-block">
-      <h2>Planned bring-up</h2>
-      <p>
-        The PCB and parts are currently on order. The full version will be brought up in stages rather
-        than assembled and powered all at once. This is intended to reduce the chance of damaging expensive
-        crosspoint/output-stage parts and to make faults easier to isolate.
-      </p>
-      <ol>
-        <li>Bare-board inspection: connector orientation, rail-to-ground resistance, shorts, and continuity.</li>
-        <li>Power entry: barrel jack polarity, fuse, reverse-protection diode, protected 12 V rail, and current limit.</li>
-        <li>Regulators: +7.8 V, −7.8 V, 5 V/D_VCC behavior, ripple, and heating.</li>
-        <li>AD3 connector: DIO defaults, pullups/pulldowns, W1/W2 routing, trigger pins, and safe states.</li>
-        <li>LEDs and level shifting: one LED first, data polarity, LED current, and switching behavior.</li>
-        <li>One output lane: command caps, gates, source/sink current, off state, compensation, and resistive load testing.</li>
-        <li>Measurement path: voltage/current capture, mux selection, scaling, and loading effects.</li>
-        <li>One AD75019: serial programming, default-open behavior, selected route continuity, and isolation.</li>
-        <li>Full routing and multi-lane tests: CH1–CH48 validation, common return, reference jumpers, and varied stimulation patterns.</li>
-      </ol>
-    </section>
-
+    <section class="content-block"><h2>Completed bring-up and validation</h2><p>Assembled and brought up the four-layer PCB, isolating faults across power regulation, digital control, crosspoint routing, and measurement. Rework included control-buffer replacement, clock-line short repair, and solder-joint corrections. Electrode routing and simultaneous eight-lane operation were verified.</p><ul><li>100–300 µA biphasic stimulation tested across representative 3.3–22 kΩ loads on ±7.8 V rails; mean internal-sense tracking error below 0.7% in representative-load tests.</li><li>Less than 1.7% worst-case internal-sense error at 200 µA in the tested simultaneous eight-lane configurations after resolving a shared-bus interaction.</li><li>A 90-second, 1 MS/s mixed-topology stress test retained 89.88 million paired samples with zero lost/corrupt samples or discontinuities.</li></ul></section><section class="content-block"><h2>Desktop and remote operator software</h2><p>Built a PySide6 timeline editor and Raspberry Pi-hosted browser operator for experiment authoring, route-aware scheduling, calibration, hardware-timed waveform generation, interleaved current/voltage capture, visualization, and export. Long runs spool capture data to disk before post-run finalization and transfer.</p></section>
     <section class="content-block">
       <h2>Known limitations and future direction</h2>
       <p>
         The first PCB is a bench prototype, not a final implantable or fully closed-loop device. It is
         intended to validate the routed-lane architecture, output-stage behavior, measurement path, and
         control strategy. Fast pulse-to-pulse closed-loop updates are not practical through live Python/USB,
-        so future versions may benefit from a local embedded controller, FPGA/Zynq sequencer, or eventual
+        so Rev-2 is investigating FPGA acquisition and embedded transport, with possible future
         custom mixed-signal IC controller.
       </p>
       <ul>
         <li>Compliance voltage remains the main limit for very high-resistance loads.</li>
         <li>Calibration is required for accurate source/sink current delivery.</li>
-        <li>PCB loop stability and measurement noise must be characterized after assembly.</li>
+        <li>Internal-sense measurements characterize the tested configurations; they do not establish accuracy for every electrode load or operating condition.</li>
         <li>Crosspoint routing should be updated only while output lanes are blanked or inactive.</li>
         <li>Future work could include embedded/FPGA control, 64-channel expansion, more active lanes, and closed-loop experiment support.</li>
       </ul>
