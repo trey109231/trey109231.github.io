@@ -8,8 +8,9 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <a class="skip-link" href="#top">Skip to content</a>
   <header class="site-header">
-    <nav class="nav">
+    <nav class="nav" aria-label="Main navigation">
       <a class="brand" href="#top">Trey Kirscht</a>
       <div class="nav-links">
         <a href="#projects">Projects</a>
@@ -21,7 +22,16 @@
   </header>
 
   <main id="top">
-<section id="projects" class="section">
+    <section class="section portfolio-intro" aria-labelledby="intro-title">
+      <p class="eyebrow">Trey Kirscht · Electrical engineering</p>
+      <h1 id="intro-title">Embedded systems, from circuits to measured results.</h1>
+      <p class="hero-text">I'm an electrical engineering co-op student at the University of Alberta. I build embedded firmware, FPGA interfaces and mixed-signal instruments, with an emphasis on bringing real hardware up and testing how it behaves.</p>
+      <div class="button-row">
+        <a class="button primary" href="#projects">Explore projects</a>
+        <a class="button" href="resume.pdf">Resume PDF</a>
+      </div>
+    </section>
+    <section id="projects" class="section">
       <div class="section-heading">
         <p class="eyebrow">Featured work</p>
         <h2>Projects</h2>
@@ -30,28 +40,34 @@
       <div class="project-grid">
         <article class="project-card featured">
           <div>
-            <p class="project-type">Mixed-signal R&D prototype</p>
-            <h3>48-Electrode Intraspinal Stimulation Platform</h3>
-            <p>
-              A mixed-signal research prototype for intraspinal stimulation, combining analog
-              current-source/sink output stages, command-cap timing, electrode routing, measurement
-              paths, desktop and browser operator software, and a completed four-layer PCB. Validated
-              eight-lane operation and disk-backed long capture on real hardware.
-            </p>
+            <p class="project-type">Mixed-signal research · Completed bench prototype</p>
+            <h3>48-Electrode Stimulation Instrument — Rev 1</h3>
+            <p>Eight simultaneous source/sink lanes routed to 48 electrodes, with a custom four-layer PCB, calibrated analog outputs, desktop and Raspberry Pi operators, and hardware-timed AD3 control. Final validation covered simultaneous stimulation, routing, waveform accuracy and a 90-second acquisition with no lost or corrupted samples.</p>
           </div>
           <ul class="tag-list">
-            <li>Mixed-signal design</li>
-            <li>PCB architecture</li>
+            <li>Analog design</li>
+            <li>PCB bring-up</li>
             <li>Python control</li>
             <li>Bench validation</li>
-            <li>AD3 timing</li>
           </ul>
-          <a class="text-link" href="projects/stimulator-platform.html">Read project summary →</a>
+          <a class="text-link" href="projects/stimulator-platform.html">Read case study →</a>
         </article>
 
-<article class="project-card"><p class="project-type">FPGA / SoC research · In development</p><h3>FPGA-Based Neural Acquisition — Rev-2</h3><p>Developing neural acquisition interfaces using Verilog, Zynq-7000 and Cyclone IV, with chip emulators, timestamped capture, AXI DMA, and embedded Linux bring-up.</p><ul class="tag-list"><li>Verilog</li><li>Vivado / Vitis</li><li>Quartus</li><li>PetaLinux</li></ul><a class="text-link" href="projects/fpga-neural-acquisition.html">Read project summary →</a></article>
-<article class="project-card"><p class="project-type">USB HID protocol reverse engineering</p><h3>Razer Mouse Control</h3><p>Recovered mouse configuration protocols and built standalone Python control utilities for the DeathAdder 2013 and Viper Mini.</p><ul class="tag-list"><li>Ghidra</li><li>USB HID</li><li>USBPcap / Wireshark</li><li>Python</li></ul><a class="text-link" href="projects/razer-mouse-control.html">Read project summary →</a></article>
-<article class="project-card"><p class="project-type">Verilog processor design · Hardware validated</p><h3>4-bit Soft CPU on a MAX II CPLD</h3><p>A custom accumulator CPU on an EPM240 CPLD, executing an instruction-timed software UART routine.</p><ul class="tag-list"><li>Verilog</li><li>MAX II EPM240</li><li>Quartus Prime</li><li>Software UART</li></ul><a class="text-link" href="projects/cpld-soft-cpu.html">Read project summary →</a></article>
+        <article class="project-card featured">
+          <div>
+            <p class="project-type">FPGA + MCU acquisition · Wireless evaluation in progress</p>
+            <h3>Neural Acquisition &amp; Wireless Stimulation — Rev 2</h3>
+            <p>Independent RHD/RHS chip emulators, a three-link Zynq acquisition bench, and an optimized RP2040 PIO/DMA engine. Demonstrated 16-channel recording at 30 kS/s per channel alongside scheduled stimulus commands, with independent counter checks and short-run timing measurements. These form the test platform for the upcoming wireless controller comparison.</p>
+          </div>
+          <ul class="tag-list">
+            <li>Verilog / Cyclone IV</li>
+            <li>Zynq / AXI DMA</li>
+            <li>RP2040 PIO / DMA</li>
+            <li>Timing and throughput</li>
+          </ul>
+          <a class="text-link" href="projects/fpga-neural-acquisition.html">Read case study →</a>
+        </article>
+
         <article class="project-card featured">
           <div>
             <p class="project-type">Capstone / client project</p>
@@ -91,6 +107,21 @@
             <li>Hardware validation</li>
           </ul>
           <a class="text-link" href="projects/badrtos.html">Read project summary →</a>
+        </article>
+
+        <article class="project-card">
+          <div>
+            <p class="project-type">USB HID reverse engineering · Physical-device verification</p>
+            <h3>Razer Mouse Control</h3>
+            <p>Standalone DeathAdder 2013 and Viper Mini configuration tools, backed by firmware extraction, Ghidra analysis and USB capture. Recovered device-specific DPI, polling and stage-table behavior, then verified writes and restoration on the actual mice.</p>
+          </div>
+          <ul class="tag-list">
+            <li>Ghidra</li>
+            <li>USB HID</li>
+            <li>USBPcap / Wireshark</li>
+            <li>Python</li>
+          </ul>
+          <a class="text-link" href="projects/razer-mouse-control.html">Read case study →</a>
         </article>
 
         <article class="project-card">
@@ -183,10 +214,10 @@
         <p>My strongest area is embedded hardware/software integration: making firmware, instruments, PCBs, scripts, and bench measurements line up into a working system.</p>
       </div>
       <div class="skill-columns">
-        <div class="skill-box"><h3>Embedded & firmware</h3><p>STM32, Particle/nRF52, AVR, PIC, 8051-family MCUs (CH552, STC), C/C++, AVR/PIC assembly, Python tooling, UART/SPI/I²C, timers, DMA, ADC/DAC workflows, RTOS primitives.</p></div>
+        <div class="skill-box"><h3>Embedded & firmware</h3><p>RP2040 PIO/DMA, STM32, Particle/nRF52, AVR, PIC, 8051-family MCUs, C/C++, assembly, Python tooling, UART/SPI/I²C, timers, ADC/DAC workflows and RTOS primitives.</p></div>
         <div class="skill-box"><h3>Hardware & PCB</h3><p>Mixed-signal prototyping, analog output stages, rectifier/SCR control, routing/muxing, power rails, PCB assembly, bench debug.</p></div>
         <div class="skill-box"><h3>Debug, validation & lab automation</h3><p>Oscilloscopes, logic analyzers, WaveForms/AD3, SCPI/VXI-11/VISA/RS-232 instrument control, driver profiling, waveform capture, calibration workflows, web/serial test tools.</p></div>
-        <div class="skill-box"><h3>FPGA &amp; SoC</h3><p>Verilog, Vivado, Vitis, Quartus Prime, Gowin EDA / Tang Nano, Zynq-7000, Cyclone IV, MAX II CPLDs, simulation/testbenches, timing constraints and analysis, AXI DMA, PetaLinux.</p></div><div class="skill-box"><h3>Reverse engineering &amp; debugging</h3><p>Ghidra, Binwalk, USBPcap, Wireshark, USB HID protocol analysis, ST-Link, XSDB, JTAG, sigrok / PulseView.</p></div><div class="skill-box"><h3>Systems thinking</h3><p>Architecture tradeoffs, hardware/software boundaries, signal contracts, scheduling/concurrency, prototype-to-product planning.</p></div>
+        <div class="skill-box"><h3>FPGA &amp; SoC</h3><p>Verilog, Vivado, Vitis, Quartus Prime, Zynq-7000, Cyclone IV, simulation and testbenches, timing constraints and analysis, clock-domain crossings and AXI DMA.</p></div><div class="skill-box"><h3>Reverse engineering &amp; debugging</h3><p>Ghidra, Binwalk, USBPcap, Wireshark, USB HID protocol analysis, ST-Link, XSDB, JTAG, sigrok / PulseView.</p></div><div class="skill-box"><h3>Systems thinking</h3><p>Architecture tradeoffs, hardware/software boundaries, signal contracts, scheduling/concurrency, prototype-to-product planning.</p></div>
       </div>
     </section>
 

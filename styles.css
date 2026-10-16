@@ -124,3 +124,78 @@ code {
 @media(max-width:820px){
   .figure-grid.two-up{grid-template-columns:1fr}
 }
+
+/* Case-study navigation and long-form reading. */
+.skip-link {
+  position: fixed;
+  top: .5rem;
+  left: 1rem;
+  z-index: 100;
+  padding: .7rem 1rem;
+  border-radius: .6rem;
+  background: var(--accent);
+  color: var(--bg);
+  transform: translateY(-160%);
+}
+.skip-link:focus { transform: translateY(0); }
+a:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+[id] { scroll-margin-top: 8rem; }
+.portfolio-intro { padding-bottom: 2rem; }
+.portfolio-intro h1 { font-size: clamp(2.4rem, 5vw, 4rem); }
+.portfolio-intro + .section { padding-top: 3rem; }
+.contact-card h2 { overflow-wrap: anywhere; }
+.project-page h1 { font-size: clamp(2.25rem, 5vw, 3.6rem); }
+.project-page h2 { font-size: clamp(1.65rem, 3vw, 2.2rem); line-height: 1.2; }
+.project-page .content-block { margin: 3rem 0; }
+.content-block li + li { margin-top: .6rem; }
+.content-block strong { color: var(--text); }
+.page-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem 1.2rem;
+  padding: 1rem 0;
+  margin: 1.5rem 0 2rem;
+  border-block: 1px solid var(--line);
+  color: var(--accent);
+  font-size: .95rem;
+}
+.page-nav a:hover { text-decoration: underline; text-underline-offset: .25em; }
+.table-scroll { max-width: 100%; overflow-x: auto; }
+.table-scroll .validation-table { min-width: 560px; }
+.validation-table caption {
+  text-align: left;
+  color: var(--muted);
+  font-size: .9rem;
+  padding: 0 0 .75rem;
+}
+.validation-table th[scope="row"] {
+  font-weight: 600;
+  background: rgba(255,255,255,.025);
+}
+.validation-table code { overflow-wrap: anywhere; }
+.source-note {
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+  font-size: .9rem;
+}
+.evidence-log {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(0,0,0,.25);
+  font-size: .85rem;
+  line-height: 1.7;
+}
+.evidence-log code { background: none; border: 0; padding: 0; }
+.project-figure a { display: block; }
+.project-figure a:focus-visible { outline-offset: -4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .button { transition: none; }
+}

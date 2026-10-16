@@ -1,1 +1,123 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>FPGA-Based Neural Acquisition — Rev-2 | Trey Kirscht</title><meta name="description" content="Developing neural acquisition interfaces using Verilog, Zynq-7000 and Cyclone IV, with chip emulators, timestamped capture, AXI DMA, and embedded Linux bring-up."><link rel="stylesheet" href="../styles.css"></head><body><header class="site-header"><nav class="nav"><a class="brand" href="../index.html">Trey Kirscht</a><div class="nav-links"><a href="../index.html#projects">Projects</a><a href="../index.html#skills">Skills</a><a href="../index.html#contact">Contact</a></div></nav></header><main class="section project-page"><p class="eyebrow">FPGA / SoC research · In development</p><h1>FPGA-Based Neural Acquisition — Rev-2</h1><p class="hero-text">Developing neural acquisition interfaces using Verilog, Zynq-7000 and Cyclone IV, with chip emulators, timestamped capture, AXI DMA, and embedded Linux bring-up.</p><section class="content-block"><h2>Architecture and validation</h2><p>Developed Intan-compatible SPI control and FPGA chip emulators to test acquisition interfaces before integrating the target devices. Demonstrated three board-to-board links with corresponding chip emulators; system development remains ongoing.</p></section><section class="content-block"><h2>Acquisition data path</h2><p>Integrated timestamped records, FIFOs, and AXI DMA into a Zynq prototype. Used simulation testbenches, Vitis test applications, UART diagnostics, and record-integrity checks to investigate hardware/software interfaces.</p></section><section class="content-block"><h2>Embedded Linux bring-up</h2><p>Built and booted a custom PetaLinux image on a Zynq-7010 board with UART console access and Ethernet connectivity. Used Vivado and Quartus for synthesis, implementation, pin constraints, timing-report analysis, and JTAG programming.</p></section><section class="content-block"><h2>Current research direction</h2><p>Investigating compact wireless acquisition with MCU-based transport and a possible low-power FPGA interface. Planned evaluation compares sustained throughput, dropped samples, timing reliability, and measured power consumption. A day of battery life is a design target, not a demonstrated result.</p></section><a class="button" href="../index.html#projects">← Back to projects</a></main><footer class="footer"><p>Trey Kirscht</p></footer></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Neural Acquisition &amp; Wireless Stimulation — Rev 2 | Trey Kirscht</title>
+  <meta name="description" content="FPGA Intan chip emulators, a three-link Zynq acquisition bench, and optimized RP2040 PIO/DMA recording and stimulation ahead of a wireless controller comparison.">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="../index.html">Trey Kirscht</a>
+      <div class="nav-links">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#skills">Skills</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+  <main id="main" class="section project-page">
+    <p class="eyebrow">FPGA + embedded C · Validated subsystems, architecture evaluation ongoing</p>
+    <h1>Neural Acquisition &amp; Wireless Stimulation — Rev&nbsp;2</h1>
+    <p class="hero-text">A reusable digital test platform for the next neural stimulation and recording system: Cyclone IV chip emulators, a Zynq acquisition path, and a 25 MHz RP2040 PIO/DMA engine. These provide a common benchmark for the upcoming wireless controller comparison.</p>
+    <div class="project-meta">
+      <div class="meta-box"><strong>My contribution</strong><span>Protocol modeling in Verilog, FPGA/MCU acquisition, timing constraints, Python checkers, bench integration and performance investigation.</span></div>
+      <div class="meta-box"><strong>Validated hardware</strong><span>Three simultaneous Zynq SPI links; RP2040 recording at 16 × 30 kS/s with scheduled stimulus commands and independent emulator checks.</span></div>
+      <div class="meta-box"><strong>Current boundary</strong><span>Digital emulator bench results. Actual wireless transport, SD recording, measured power and real Intan analog behavior remain integration work.</span></div>
+    </div>
+    <nav class="page-nav" aria-label="On this page">
+      <a href="#emulator">Chip emulators</a><a href="#zynq">Zynq acquisition</a><a href="#pio">PIO/DMA</a>
+      <a href="#optimization">Optimization</a><a href="#wireless">Wireless evaluation</a>
+    </nav>
+    <section class="content-block">
+      <h2>Build a testable interface before selecting the controller</h2>
+      <p><a class="text-link" href="stimulator-platform.html">Rev 1</a> established the analog stimulation and operator workflow using an AD3. The next architecture investigates Intan recording/stimulation devices and dedicated acquisition hardware, with both a larger headstage path and a compact wireless research system under consideration.</p>
+      <p>Several controller choices could satisfy the interface on paper. The useful comparison is whether they preserve stimulus timing, drain continuous ADC data, recover from service interruptions and leave enough power and memory budget for the rest of the system. I built chip emulators and common validation tools so each candidate can face the same observable workload.</p>
+    </section>
+
+    <section id="emulator" class="content-block">
+      <h2>Cyclone IV emulators as independent instruments</h2>
+      <p>The FPGA models cover the digital interfaces of RHD recording and RHS recording/stimulation devices. They decode SPI commands, return identification and register data, preserve command/response latency, and generate deterministic channel/sample signatures. The RHS model also implements buffered stimulus registers and global U updates.</p>
+      <p>A simplified per-channel response model generates synthetic AC/DC ADC values from stimulus state, polarity, magnitude, recovery and configured load behavior. This lets a host check the consequences of a command sequence as well as its register echoes. It is a controllable test model of the interface and response, not a validated physiological model.</p>
+      <ul>
+        <li><strong>UART diagnostics:</strong> conversion, command, protocol-error and malformed-frame counters, plus first-failure framing information.</li>
+        <li><strong>Timing observation:</strong> TIM1 records stimulus state transitions and timestamps independently of the acquisition MCU.</li>
+        <li><strong>Repeatable stimuli:</strong> prescribed seeds, response bounds and fault controls make failures reproducible.</li>
+        <li><strong>Bounded evidence:</strong> the timing trace has finite storage; short timing tests and long integrity tests have distinct verdicts.</li>
+      </ul>
+      <p>The Cyclone IV implementation also required careful timing closure at 25 MHz SPI. First-bit availability, CS handling, return-path delay and clock-domain crossings were practical design constraints. Framing diagnostics helped distinguish incomplete transfers from incorrect sample values; a PHY that simulated correctly still needed a valid fitted implementation and a working board-to-board interface.</p>
+    </section>
+
+    <section id="zynq" class="content-block">
+      <h2>Three-link Zynq acquisition baseline</h2>
+      <p>The Zynq-7020 prototype receives two RHD links and one RHS link, builds timestamped records and moves them through FIFOs and AXI DMA to the processing system. Vitis bench applications validate the record fields and every enabled channel. Cyclone UART counters provide a separate view of what each emulated chip received.</p>
+      <p>A five-minute run completed with <strong>1,250,000 records per link</strong>, zero dropped or missing records, and clean emulator framing/protocol counters. That is 3.75 million checked records across the three links at the tested schedule. It establishes this acquisition baseline; it does not establish a completed Ethernet streaming system or the maximum scalable link count.</p>
+      <pre class="evidence-log" aria-label="Summary of the five-minute three-link bench result"><code>three_link_soak_5min: mask=7, frames=1250000 per link
+link 0: received=1250000  dropped=0  missing=0
+link 1: received=1250000  dropped=0  missing=0
+link 2: received=1250000  dropped=0  missing=0
+PASS: all record fields and every enabled channel checked</code></pre>
+      <p>The independent emulator and record checks made this useful beyond the Zynq implementation: the same RHS target could then be connected to an MCU acquisition engine.</p>
+    </section>
+
+    <section id="pio" class="content-block">
+      <h2>RP2040: hardware-timed SPI with a software data consumer</h2>
+      <p>The MCU bench runs at a 100 MHz system clock with 25 MHz SPI. A PIO state machine controls CS, SCLK, MOSI and response sampling; chained DMA feeds precomputed command sequences and writes received words into a 4,096-word ring. Core 1 validates and assembles frames. Core 0 drains a bounded export queue into a checksum sink.</p>
+      <p>All 16 ADC channels run at an average 30 kS/s each while stimulus commands share the same bus. The compiled cadence uses 33.33, 33.33 and 33.34 µs intervals, preserving the 30 kS/s average without moving conversions to accommodate stimulus events. Commands repeat across 10 ms schedule boundaries without a CPU restart.</p>
+      <p>The stimulus profiles exercise different channel states and include 5 µs and 10 µs spacing between stimulus events. Requested U commits lie on a 1 µs grid for schedules the compiler can fit. This is a demonstrated scheduling capability for admitted workloads, not a guarantee that every arbitrary combination of 16-channel updates fits every microsecond.</p>
+      <p>Short tests pair MCU sample checking with an independent TIM1 timing verdict. The observed drift-corrected event residual was approximately 0.010 µs worst-case in the supplied runs, at a nominal 20 ns recorder tick. That number describes relative digital observation, including clock-domain crossing; it is not externally calibrated absolute timing or an analog stimulus measurement.</p>
+    </section>
+
+    <section id="optimization" class="content-block">
+      <h2>Finding the bottleneck between DMA and exported frames</h2>
+      <p>The first short captures passed, but longer captures exposed a sustained software deficit. At 518,600 response words/s, full validation filled the RX ring in roughly 14 ms; a mode skipping ADC-value comparisons still overflowed in roughly 30 ms. Lag-over-time measurements showed that the common consumer path also needed work.</p>
+      <p>I used the generated code and explicit work/counter diagnostics to investigate the processing cost. The optimization pass moved the acquisition loop and compact validation references into SRAM, processed guarded private blocks, prepacked ADC bounds, removed extra frame copies and reduced repeated peripheral/status work. The checksum path explicitly uses the ARM multiply instruction.</p>
+      <p>Both modes retain command checks, sample ordering, overwrite detection and export ownership. The full mode checks every ADC pair; raw mode skips only that value comparison. Their shared transport and export path makes the comparison meaningful.</p>
+      <div class="table-scroll" role="region" aria-label="RP2040 measured buffer results" tabindex="0">
+        <table class="validation-table">
+          <caption>v0.6.0 hardware results: fine5 profile, 10 seconds per run</caption>
+          <thead><tr><th scope="col">Run</th><th scope="col">ADC pairs checked</th><th scope="col">Peak RX backlog</th><th scope="col">Outcome</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Raw</th><td>Values skipped</td><td>8 / 4,096 words</td><td>300,000 frames exported; zero drops</td></tr>
+            <tr><th scope="row">Full validation</th><td>4,800,000</td><td>8 / 4,096 words</td><td>All responses checked; zero drops</td></tr>
+            <tr><th scope="row">Raw + synthetic stress</th><td>Values skipped</td><td>529 / 4,096 words</td><td>3,329 deliberate 1 ms pauses; zero drops</td></tr>
+            <tr><th scope="row">Full + synthetic stress</th><td>4,800,000</td><td>530 / 4,096 words</td><td>3,328 deliberate 1 ms pauses; zero drops</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Each run received 5,186,001 response words. Independent emulator checks confirmed 4,800,000 conversions, 194,003 U updates including initialization, zero malformed words/protocol errors, and the final all-off/recovered state. In stress mode, early samples show the backlog returning to a few words between pauses; the peak remains bounded throughout the run.</p>
+      <p>The test deliberately adds core-0 memory traffic and core-1 interruptions. It establishes sustained operation under that synthetic workload. Actual Wi-Fi contention, SD-card write stalls and inter-MCU transfers still need to be measured. The long-run counter check also does not replace the short TIM1 event-timing tests.</p>
+    </section>
+
+    <section class="content-block">
+      <h2>Verification across software and hardware boundaries</h2>
+      <p>The test suite exercises the assembled PIO program against the actual RHS Verilog, checks the C response validators, and injects corruption, ring overwrite, queue overflow, missing completion and abort conditions. Repeated-schedule seams and the final outstanding DMA write are explicit test cases. Native sanitizer checks complement the on-board runs.</p>
+      <p>The result is a reusable acquisition engine and an independently observable target. The next controller can change without discarding the protocol tests, waveform profiles, counter checks or timing analysis.</p>
+    </section>
+
+    <section id="wireless" class="content-block">
+      <h2>The wireless controller comparison</h2>
+      <p>The current candidates will be evaluated against a common workload and PC-side protocol. The choice depends on whether the experiment needs continuous streaming, occasional transfers or local recording, as well as measured power and integration effort.</p>
+      <div class="table-scroll" role="region" aria-label="Planned wireless architecture candidates" tabindex="0">
+        <table class="validation-table">
+          <caption>Architectures under evaluation; wireless performance and power are not yet established</caption>
+          <thead><tr><th scope="col">Candidate</th><th scope="col">Question to answer</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">ESP32 alone</th><td>Can acquisition and scheduled commands coexist with worst-case Wi-Fi load on one device?</td></tr>
+            <tr><th scope="row">ESP32 + RP2040</th><td>Does separating deterministic acquisition from wireless transport justify the added device and transfer path?</td></tr>
+            <tr><th scope="row">nRF + RP2040/RP2350, with local SD</th><td>What power and buffering benefits are available when the radio can sleep between commands or monitoring transfers?</td></tr>
+            <tr><th scope="row">Pico 2W alone</th><td>How does the PIO/DMA design behave alongside the RP2350 wireless stack and shared memory traffic?</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Planned work includes a more flexible Zynq-based emulator, live schedule updates, real wireless/storage traffic and automated PC control. A separate UART or Ethernet diagnostic connection to the emulator will allow the test runner to inspect what reached the chip even if the wireless device stops reporting.</p>
+      <p class="source-note">Bench evidence on this page comes from the completed three-link Zynq soak and the RP2040 v0.6.0 normal/stress runs recorded in October 2026. Future controller, storage and power comparisons are presented as planned work.</p>
+    </section>
+    <div class="button-row"><a class="button" href="../index.html#projects">← Back to projects</a></div>
+  </main>
+  <footer class="footer"><p>Trey Kirscht · Embedded systems, FPGA development &amp; instrumentation</p></footer>
+</body>
+</html>

@@ -1,1 +1,114 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Razer Mouse Control | Trey Kirscht</title><meta name="description" content="Recovered mouse configuration protocols and built standalone Python control utilities for the DeathAdder 2013 and Viper Mini."><link rel="stylesheet" href="../styles.css"></head><body><header class="site-header"><nav class="nav"><a class="brand" href="../index.html">Trey Kirscht</a><div class="nav-links"><a href="../index.html#projects">Projects</a><a href="../index.html#skills">Skills</a><a href="../index.html#contact">Contact</a></div></nav></header><main class="section project-page"><p class="eyebrow">USB HID protocol reverse engineering</p><h1>Razer Mouse Control</h1><p class="hero-text">Recovered mouse configuration protocols and built standalone Python control utilities for the DeathAdder 2013 and Viper Mini.</p><div class="button-row"><a class="button primary" href="https://github.com/trey109231/RazerMouseControl">View on GitHub</a></div><section class="content-block"><h2>Motivation</h2><p>Built a lightweight alternative to vendor software for configuring supported mice, using direct USB HID communication.</p></section><section class="content-block"><h2>Protocol recovery</h2><p>Investigated installer resources, native x86 libraries, managed .NET components, and extracted firmware. Used Ghidra analysis and USBPcap/Wireshark captures to recover report framing, checksums, command encodings, and device-specific configuration fields.</p></section><section class="content-block"><h2>Implementation and verification</h2><p>Implemented DPI, polling, and device-specific lighting controls in Python utilities. Protocol handling validates transaction IDs, command echoes, checksums, and device status. Hardware tests compare configuration readback after writes and restore baseline settings.</p></section><section class="content-block"><h2>Scope</h2><p>Device capabilities differ between the DeathAdder 2013 and Viper Mini. The utilities target their supported configuration features rather than reproducing the entire Synapse suite.</p></section><a class="button" href="../index.html#projects">← Back to projects</a></main><footer class="footer"><p>Trey Kirscht</p></footer></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Razer Mouse Control | Trey Kirscht</title>
+  <meta name="description" content="Recovering DeathAdder 2013 and Viper Mini USB HID configuration protocols through firmware and host-library analysis, then implementing verified standalone Windows tools.">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="../index.html">Trey Kirscht</a>
+      <div class="nav-links">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#skills">Skills</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+  <main id="main" class="section project-page">
+    <p class="eyebrow">Protocol reverse engineering · Windows USB HID · Hardware verified</p>
+    <h1>Razer Mouse Control</h1>
+    <p class="hero-text">Two small Windows utilities for configuring a DeathAdder 2013 and Viper Mini directly over USB HID. The project grew from an old mouse teardown into firmware extraction, native and managed host-code analysis, protocol recovery and reversible hardware tests.</p>
+    <div class="project-meta">
+      <div class="meta-box"><strong>My contribution</strong><span>Hardware investigation, firmware/host analysis, independent Python protocol implementations, Tkinter interfaces and device verification.</span></div>
+      <div class="meta-box"><strong>Devices</strong><span>DeathAdder 2013 (1532:0037) and Viper Mini (1532:008A). Implemented features are specific to these product IDs.</span></div>
+      <div class="meta-box"><strong>Result</strong><span>DPI and polling control on both devices; DeathAdder lighting and Viper DPI stages, with readback after changes.</span></div>
+    </div>
+    <div class="button-row">
+      <a class="button primary" href="https://github.com/trey109231/RazerMouseControl">Source and setup</a>
+      <a class="button" href="https://github.com/trey109231/RazerMouseControl/blob/main/docs/reverse-engineering.md">Full investigation notes</a>
+    </div>
+    <nav class="page-nav" aria-label="On this page">
+      <a href="#investigation">Investigation</a><a href="#protocol">Protocol</a>
+      <a href="#implementation">Implementation</a><a href="#verification">Hardware verification</a>
+    </nav>
+
+    <section class="content-block">
+      <h2>A small configuration tool with a much larger investigation behind it</h2>
+      <p>The practical goal was simple: read and change ordinary mouse settings without running the vendor's full application suite. The tools connect to the hardware, inspect its current configuration, apply a requested change and verify it with a fresh read. JSON profiles provide a portable record of settings.</p>
+      <p>The useful engineering work was discovering what those settings meant on the wire. That required relating device hardware, updater resources, native C++ protocol objects, managed application layers and observed USB transfers.</p>
+    </section>
+
+    <section id="investigation" class="content-block">
+      <h2>DeathAdder: from teardown to a coherent firmware image</h2>
+      <p>The DeathAdder teardown revealed an MC9S08JM16, a 16 KiB HCS08 microcontroller with USB support, plus an unpopulated six-pin header consistent with its debug interface. I did not use that header to read the chip. The distributed firmware updater provided the starting image and host-side protocol evidence.</p>
+      <p>The updater combined a managed .NET front end with a native x86 device library. Its firmware was embedded as UTF-16 Motorola S-record strings rather than a loose binary. Extracting and ordering those address-bearing records recovered a 16 KiB image.</p>
+      <p>Correct memory mapping was essential. Loading the image at zero produced misleading branches and vectors; mapping it to the HCS08 flash window at <code>0xC000–0xFFFF</code> aligned the reset and interrupt paths. A PyGhidra annotation helper makes the flash mapping, option-byte labels and reset-vector setup repeatable.</p>
+      <p>The host library was the most direct route to normal configuration commands. Following exported functions, C++ RTTI and virtual calls identified the HID feature-report path used by the normal mouse and the WinUSB path used after bootloader enumeration.</p>
+    </section>
+
+    <section class="content-block">
+      <h2>Viper Mini: finding the serializer inside Synapse</h2>
+      <p>The newer Viper stack contained far more software, but the relevant path was concentrated in its product-specific module. Tracing the device control object to its Protocol 2.5 instance exposed the constructors for polling, current DPI and the hardware DPI-button stage table.</p>
+      <p>The updater confirmed the feature-report size and device metadata. The product module supplied the configuration serialization. USB captures and comparison with OpenRazer then provided additional checks on framing and command interpretation.</p>
+      <p>A particularly useful failure involved DPI stage IDs. An early hypothesis treated them as zero-based indexes and sent IDs 0 and 1; the mouse rejected the table with status <code>0x03</code>. The baseline actually contained IDs 1 and 2. Preserving the firmware-defined IDs fixed the write. The implementation now treats IDs as identifiers and requires the active ID to exist in the supplied table.</p>
+    </section>
+
+    <section id="protocol" class="content-block">
+      <h2>One report envelope, different device semantics</h2>
+      <p>Both tools exchange a 91-byte Windows HID feature report: one report-ID byte followed by a 90-byte protocol body. The body carries status, transaction information, command class/ID, payload length, an 80-byte argument area and an XOR checksum.</p>
+      <div class="table-scroll" role="region" aria-label="Recovered device configuration differences" tabindex="0">
+        <table class="validation-table">
+          <caption>Protocol details that directly affected the implementation</caption>
+          <thead><tr><th scope="col">Behavior</th><th scope="col">DeathAdder 2013</th><th scope="col">Viper Mini</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">DPI representation</th><td>One compressed byte per axis, mapped across 0–6750 DPI.</td><td>Big-endian 16-bit X/Y values with a storage selector.</td></tr>
+            <tr><th scope="row">Polling</th><td colspan="2">125, 500 and 1000 Hz, represented by protocol codes 0x08, 0x02 and 0x01.</td></tr>
+            <tr><th scope="row">Additional controls</th><td>Fixed-green wheel/logo state, effect and brightness.</td><td>Up to five DPI stages and selection of the active stage.</td></tr>
+            <tr><th scope="row">Important distinction</th><td>The DPI reply contains two axes and a reserved byte, not one 16-bit DPI value.</td><td>The 0x26-byte stage payload contains a header and five reserved seven-byte entries; stage IDs must be preserved.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The transport validates response checksums, status, transaction IDs, command echoes and expected payload sizes. A returned success status alone is insufficient: a fresh semantic readback must match the requested settings.</p>
+    </section>
+
+    <section id="implementation" class="content-block">
+      <h2>Independent tools with explicit readback</h2>
+      <p>The two Tkinter applications use independently written Python protocol modules and <code>hidapi</code>. They read hardware state before editing and read it again after Apply. Loading a JSON profile fills the controls; the hardware write occurs only when the user applies it.</p>
+      <p>Separate command-line tools expose read-only inspection and reversible exercises. Those tests capture the baseline, temporarily change supported settings, verify each change, restore the original state and verify restoration. The DeathAdder GUI also attempts baseline restoration if Apply fails.</p>
+      <div class="table-scroll" role="region" aria-label="Razer project source map" tabindex="0">
+        <table class="validation-table">
+          <caption>Where the implementation lives</caption>
+          <thead><tr><th scope="col">File</th><th scope="col">Responsibility</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>deathadder_bootloader.py</code></th><td>DeathAdder HID framing, normal settings, CLI exercises and explicit bootloader entry.</td></tr>
+            <tr><th scope="row"><code>viper_mini_exercise.py</code></th><td>Viper protocol, stage-table parsing and write/readback/restore tests.</td></tr>
+            <tr><th scope="row"><code>deathadder_control.py</code><br><code>viper_mini_control.py</code></th><td>Device-specific GUIs and JSON profile workflows.</td></tr>
+            <tr><th scope="row"><code>MC9S08JM16_Annotate.py</code></th><td>Repeatable Ghidra annotation for a locally recovered firmware image.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="verification" class="content-block">
+      <h2>What was checked on physical hardware</h2>
+      <p>The DeathAdder tests exercised DPI, polling and wheel-LED writes, read both supported LED groups, and restored captured settings. Explicit bootloader entry was also observed: the normal <code>1532:0037</code> HID device disconnected and <code>1532:110D</code> enumerated through WinUSB. Reconnecting the mouse returned it to normal operation.</p>
+      <p>The Viper test changed polling, current X/Y DPI and its populated two-stage table, verified those changes, then restored and reread the full baseline. The tested table used 400/800 DPI with stage IDs 1/2. The parser/editor supports up to five stages, but the repository does not claim physical testing of every table size or firmware revision.</p>
+      <p>USBPcap/Wireshark captures supported the static analysis with observed transfer sizes, field positions and re-enumeration behavior. OpenRazer was a later independent cross-check of the protocol layout and encodings. The published tools remain a separate Windows implementation.</p>
+      <p class="project-status-note"><strong>Scope.</strong> The tools configure the listed owned devices. Bootloader entry is a separate CLI operation; no erase or firmware-programming implementation is included. Viper lighting and button remapping are outside the implemented feature set.</p>
+    </section>
+
+    <section class="content-block">
+      <h2>Outcome</h2>
+      <p>The result is a pair of usable configuration utilities backed by a documented investigation. The strongest part of the project is the chain of evidence: a plausible interpretation from static analysis, an observed USB exchange, then a physical write/readback/restore result.</p>
+      <p>The public repository contains original Python code, build scripts and derived interface documentation. Vendor binaries, recovered firmware and bulk decompiler output are not redistributed. The <a class="text-link" href="https://github.com/trey109231/RazerMouseControl/blob/main/docs/reverse-engineering.md">full report</a> records packet layouts, the host call paths, rejected hypotheses and remaining limitations.</p>
+    </section>
+    <div class="button-row"><a class="button" href="../index.html#projects">← Back to projects</a></div>
+  </main>
+  <footer class="footer"><p>Trey Kirscht · Embedded systems, FPGA development &amp; instrumentation</p></footer>
+</body>
+</html>
